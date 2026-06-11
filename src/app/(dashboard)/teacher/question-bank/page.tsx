@@ -14,6 +14,11 @@ export default async function QuestionBankPage() {
         orderBy: { createdAt: 'desc' }
     });
 
+    // Fetch all courses in the system so the teacher can select them for imports/AI generation
+    const allCourses = await prisma.course.findMany({
+        orderBy: { code: 'asc' }
+    });
+
     // Group questions by course to create folders
     const coursesMap = new Map();
     questions.forEach((q) => {
@@ -33,17 +38,29 @@ export default async function QuestionBankPage() {
     const data = {
         totalQuestions: questions.length,
         courses: courses,
-        questions: questions.map(q => ({
-            id: q.id,
-            text: q.text,
-            type: q.questionType,
-            points: q.defaultPoints,
-            courseId: q.courseId,
-            courseCode: q.course.code,
-            createdAt: q.createdAt,
-            difficulty: q.difficulty === 1 ? 'سهل' : q.difficulty === 5 ? 'صعب' : 'متوسط',
-            choices: Array.isArray(q.choicesPayload) ? q.choicesPayload : []
-        }))
+        allCourses: allCourses.map(c => ({ id: c.id, code: c.code, name: c.name })),
+        questions: questions.map(q => {
+            let choices: any[] = [];
+            if (q.choicesPayload && typeof q.choicesPayload === 'object') {
+                if (Array.isArray(q.choicesPayload)) {
+                    choices = q.choicesPayload;
+                } else if ('options' in (q.choicesPayload as any) && Array.isArray((q.choicesPayload as any).options)) {
+                    choices = (q.choicesPayload as any).options;
+                }
+            }
+
+            return {
+                id: q.id,
+                text: q.text,
+                type: q.questionType,
+                points: q.defaultPoints,
+                courseId: q.courseId,
+                courseCode: q.course.code,
+                createdAt: q.createdAt,
+                difficulty: q.difficulty === 1 ? 'سهل' : q.difficulty === 5 ? 'صعب' : 'متوسط',
+                choices: choices
+            };
+        })
     };
 
     return <TeacherQuestionBankClient data={data} />;

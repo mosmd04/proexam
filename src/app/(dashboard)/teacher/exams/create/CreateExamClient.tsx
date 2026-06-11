@@ -15,9 +15,26 @@ interface Question {
   text: string;
   points: number;
   options: any;
+  sourceQuestionId?: string; // If imported from bank
+  saveToBank?: boolean;      // If we want to save this new question to bank
 }
 
-export default function CreateExamClient({ courses }: { courses: Course[] }) {
+interface BankQuestion {
+  id: string;
+  courseId: string;
+  type: "mcq" | "tf" | "essay";
+  text: string;
+  points: number;
+  options: any;
+}
+
+export default function CreateExamClient({ 
+  courses, 
+  questionBank = [] 
+}: { 
+  courses: Course[]; 
+  questionBank?: BankQuestion[]; 
+}) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,12 +52,21 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
 
   // Questions State
   const [questions, setQuestions] = useState<Question[]>([]);
+  
+  // Question Bank Modal States
+  const [showBankModal, setShowBankModal] = useState(false);
+  const [selectedBankQuestionIds, setSelectedBankQuestionIds] = useState<string[]>([]);
+  const [searchBankQuery, setSearchBankQuery] = useState("");
+  const [filterBankType, setFilterBankType] = useState<"all" | "mcq" | "tf" | "essay">("all");
+
+  // Add/Edit Modal States
   const [showModal, setShowModal] = useState<"none" | "mcq" | "tf" | "essay">("none");
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
   // Question Form Temp State
   const [qText, setQText] = useState("");
   const [qPoints, setQPoints] = useState(1);
+  const [saveToBank, setSaveToBank] = useState(true); // Default to saving new questions to bank
   const [mcqOptions, setMcqOptions] = useState([
     { id: 1, text: "", isCorrect: true },
     { id: 2, text: "", isCorrect: false },
@@ -109,6 +135,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
   const resetQuestionForm = () => {
     setQText("");
     setQPoints(1);
+    setSaveToBank(true);
     setMcqOptions([
       { id: 1, text: "", isCorrect: true },
       { id: 2, text: "", isCorrect: false },
@@ -128,6 +155,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
     setEditingQuestion(q);
     setQText(q.text);
     setQPoints(q.points);
+    setSaveToBank(q.saveToBank !== false); // Default to true if undefined
     if (q.type === "mcq") {
       setMcqOptions(q.options.options.map((opt: any, idx: number) => ({
         id: idx + 1,
@@ -151,7 +179,9 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
       type: showModal as "mcq" | "tf" | "essay",
       text: qText.trim(),
       points: qPoints,
-      options: null
+      options: null,
+      sourceQuestionId: editingQuestion?.sourceQuestionId,
+      saveToBank: editingQuestion?.sourceQuestionId ? false : saveToBank
     };
 
     if (showModal === "mcq") {
@@ -189,10 +219,54 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
     }
   };
 
+  // Question Bank Actions
+  const handleOpenBankModal = () => {
+    if (!courseId) {
+      alert("الرجاء اختيار المقرر الدراسي أولاً من الخطوة الأولى لكي نتمكن من جلب بنك الأسئلة الخاص به.");
+      return;
+    }
+    setSearchBankQuery("");
+    setFilterBankType("all");
+    setSelectedBankQuestionIds([]);
+    setShowBankModal(true);
+  };
+
+  const handleToggleBankQuestion = (id: string) => {
+    if (selectedBankQuestionIds.includes(id)) {
+      setSelectedBankQuestionIds(selectedBankQuestionIds.filter(item => item !== id));
+    } else {
+      setSelectedBankQuestionIds([...selectedBankQuestionIds, id]);
+    }
+  };
+
+  const handleImportSelected = () => {
+    const selectedQuestions = questionBank.filter(bq => selectedBankQuestionIds.includes(bq.id));
+    const newQuestions = selectedQuestions.map((bq, idx) => ({
+      id: Date.now() + idx + Math.random(), // Unique local ID
+      type: bq.type,
+      text: bq.text,
+      points: bq.points,
+      options: bq.options,
+      sourceQuestionId: bq.id,
+      saveToBank: false // It's already in the bank
+    }));
+    setQuestions([...questions, ...newQuestions]);
+    setShowBankModal(false);
+    setSelectedBankQuestionIds([]);
+  };
+
+  // Filters for Bank Questions
+  const filteredBankQuestions = questionBank.filter(bq => {
+    const matchesCourse = bq.courseId === courseId;
+    const matchesSearch = bq.text.toLowerCase().includes(searchBankQuery.toLowerCase());
+    const matchesType = filterBankType === "all" || bq.type === filterBankType;
+    return matchesCourse && matchesSearch && matchesType;
+  });
+
   const selectedCourseName = courses.find(c => c.id === courseId)?.name || "غير محدد";
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative font-sans">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative font-sans text-right" dir="rtl">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-20">
         <div className="flex items-center gap-3">
@@ -266,7 +340,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                 ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-110" 
                 : "bg-white text-slate-400 border-slate-200"
             }`}>
-              "3"
+              3
             </div>
             <span className={`text-xs font-bold transition-colors ${currentStep === 3 ? "text-slate-800" : "text-slate-400"}`}>المراجعة والنشر</span>
           </div>
@@ -288,14 +362,14 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                 <p className="text-xs text-slate-500 mt-1">يرجى ملء البيانات العامة التي ستظهر للطالب قبل بدء الامتحان</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-right">
                 <div className="space-y-1.5 col-span-1 md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700">عنوان الامتحان <span className="text-danger">*</span></label>
                   <input 
                     type="text" 
                     value={title} 
                     onChange={e => setTitle(e.target.value)} 
-                    className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800" 
+                    className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800 text-right" 
                     placeholder="مثال: اختبار الفلسفة السياسية النصفي" 
                   />
                 </div>
@@ -306,7 +380,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                     <select 
                       value={courseId} 
                       onChange={e => setCourseId(e.target.value)} 
-                      className="w-full border border-slate-200 bg-slate-50/50 p-3 pr-10 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800 appearance-none"
+                      className="w-full border border-slate-200 bg-slate-50/50 p-3 pr-10 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800 appearance-none text-right"
                     >
                       <option value="">اختر المقرر الدراسي...</option>
                       {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -325,7 +399,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                       min="5" 
                       value={durationMinutes} 
                       onChange={e => setDurationMinutes(Math.max(1, Number(e.target.value)))} 
-                      className="w-full border border-slate-200 bg-slate-50/50 p-3 pr-12 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800" 
+                      className="w-full border border-slate-200 bg-slate-50/50 p-3 pr-12 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800 text-center" 
                     />
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
                       دقيقة
@@ -338,7 +412,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                   <textarea 
                     value={description} 
                     onChange={e => setDescription(e.target.value)} 
-                    className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-slate-800" 
+                    className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-slate-800 text-right" 
                     rows={3}
                     placeholder="مثال: يحتوي الامتحان على أسئلة اختيار من متعدد، وصح وخطأ، وسؤال مقالي. الرجاء عدم إغلاق المتصفح أو التنقل بين التبويبات تجنباً للحرمان..."
                   ></textarea>
@@ -354,14 +428,14 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                 <p className="text-xs text-slate-500 mt-1">حدد النطاق الزمني الكلي المتاح للطلاب لدخول وتأدية الامتحان</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-right">
                 <div className="space-y-1.5">
                   <label className="block text-sm font-bold text-slate-700">تاريخ ووقت البدء <span className="text-danger">*</span></label>
                   <input 
                     type="datetime-local" 
                     value={scheduledStart} 
                     onChange={e => setScheduledStart(e.target.value)} 
-                    className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800" 
+                    className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800 text-right" 
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -370,7 +444,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                     type="datetime-local" 
                     value={scheduledEnd} 
                     onChange={e => setScheduledEnd(e.target.value)} 
-                    className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800" 
+                    className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800 text-right" 
                   />
                 </div>
               </div>
@@ -400,11 +474,11 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                   }`}>
                     <i className="fas fa-random text-lg"></i>
                   </div>
-                  <div className="flex-1 space-y-1">
+                  <div className="flex-1 space-y-1 text-right">
                     <div className="flex items-center justify-between">
                       <h3 className="font-extrabold text-sm text-slate-900">عشوائية ترتيب الأسئلة</h3>
-                      <div className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-255 ${shuffleQuestions ? "bg-primary" : "bg-slate-200"}`}>
-                        <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-255 ${shuffleQuestions ? "-translate-x-4" : "translate-x-0"}`}></div>
+                      <div className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ${shuffleQuestions ? "bg-primary" : "bg-slate-200"}`}>
+                        <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${shuffleQuestions ? "-translate-x-4" : "translate-x-0"}`}></div>
                       </div>
                     </div>
                     <p className="text-xs text-slate-500 leading-relaxed">يتم خلط وترتيب الأسئلة بشكل عشوائي ومختلف تماماً لكل طالب للحد من محاولات الغش الجماعي.</p>
@@ -425,11 +499,11 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                   }`}>
                     <i className="fas fa-shield-alt text-lg"></i>
                   </div>
-                  <div className="flex-1 space-y-1">
+                  <div className="flex-1 space-y-1 text-right">
                     <div className="flex items-center justify-between">
                       <h3 className="font-extrabold text-sm text-slate-900">المراقبة الذكية بالذكاء الاصطناعي</h3>
-                      <div className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-255 ${enableProctoring ? "bg-primary" : "bg-slate-200"}`}>
-                        <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-255 ${enableProctoring ? "-translate-x-4" : "translate-x-0"}`}></div>
+                      <div className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ${enableProctoring ? "bg-primary" : "bg-slate-200"}`}>
+                        <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${enableProctoring ? "-translate-x-4" : "translate-x-0"}`}></div>
                       </div>
                     </div>
                     <p className="text-xs text-slate-500 leading-relaxed">تنبيه الطالب وتسجيل مخالفات فورية في حال تبديل التبويب، أو الخروج من وضع ملء الشاشة، مع تشغيل الكاميرا للمراقبة.</p>
@@ -443,70 +517,80 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
 
         {/* STEP 2: Questions Builder */}
         {currentStep === 2 && (
-          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
+          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
             
             {/* Sidebar Tools */}
-            <aside className="w-full lg:w-72 shrink-0 space-y-4">
+            <aside className="w-full lg:w-80 shrink-0 space-y-4 text-right">
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div>
                   <h3 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
                     <i className="fas fa-tools text-primary"></i> أدوات إضافة الأسئلة
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1">اختر نوع السؤال لإضافته للامتحان</p>
+                  <p className="text-xs text-slate-500 mt-1">اختر نوع السؤال لإضافته للامتحان أو استورد من بنك الأسئلة الخاص بالمقرر</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <button 
                     onClick={() => openAddQuestion("mcq")} 
-                    className="w-full p-4 text-right bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 rounded-xl font-bold text-primary transition-all shadow-sm flex items-center gap-3 group"
+                    className="w-full p-3 text-right bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 rounded-xl font-bold text-primary transition-all shadow-sm flex items-center gap-3 group"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
                       <i className="fas fa-list-ul text-xs"></i>
                     </div>
-                    <div>
-                      <div className="text-sm font-extrabold">اختيار من متعدد</div>
-                      <div className="text-[10px] text-primary/70 font-normal">سؤال متعدد الخيارات بإجابة واحدة</div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-extrabold">سؤال اختيار من متعدد</div>
+                      <div className="text-[10px] text-primary/70 font-normal truncate">سؤال متعدد الخيارات بإجابة واحدة</div>
                     </div>
                   </button>
 
                   <button 
                     onClick={() => openAddQuestion("tf")} 
-                    className="w-full p-4 text-right bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100 rounded-xl font-bold text-emerald-600 transition-all shadow-sm flex items-center gap-3 group"
+                    className="w-full p-3 text-right bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100 rounded-xl font-bold text-emerald-600 transition-all shadow-sm flex items-center gap-3 group"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
                       <i className="fas fa-check-double text-xs"></i>
                     </div>
-                    <div>
-                      <div className="text-sm font-extrabold">صح أو خطأ</div>
-                      <div className="text-[10px] text-emerald-600/70 font-normal">إقرار بحقائق محددة ومباشرة</div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-extrabold">سؤال صح أو خطأ</div>
+                      <div className="text-[10px] text-emerald-600/70 font-normal truncate">إقرار بحقائق محددة ومباشرة</div>
                     </div>
                   </button>
 
                   <button 
                     onClick={() => openAddQuestion("essay")} 
-                    className="w-full p-4 text-right bg-amber-50/50 hover:bg-amber-50 border border-amber-100 rounded-xl font-bold text-amber-600 transition-all shadow-sm flex items-center gap-3 group"
+                    className="w-full p-3 text-right bg-amber-50/50 hover:bg-amber-50 border border-amber-100 rounded-xl font-bold text-amber-600 transition-all shadow-sm flex items-center gap-3 group"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
                       <i className="fas fa-align-right text-xs"></i>
                     </div>
-                    <div>
-                      <div className="text-sm font-extrabold">سؤال مقالي</div>
-                      <div className="text-[10px] text-amber-600/70 font-normal">سؤال نصي مفتوح يُصحح يدوياً لاحقاً</div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-extrabold">سؤال مقالي</div>
+                      <div className="text-[10px] text-amber-600/70 font-normal truncate">سؤال نصي مفتوح يُصحح يدوياً</div>
                     </div>
                   </button>
+
+                  {/* IMPORT FROM QUESTION BANK BUTTON */}
+                  <div className="border-t border-slate-100 pt-3 mt-3">
+                    <button 
+                      onClick={handleOpenBankModal} 
+                      className="w-full p-3.5 text-center bg-violet-650 hover:bg-violet-700 text-white rounded-xl font-extrabold text-xs transition-all shadow-md shadow-violet-500/10 flex items-center justify-center gap-2 hover:-translate-y-0.5"
+                    >
+                      <i className="fas fa-database"></i> استيراد من بنك الأسئلة
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Quick stats on sidebar */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">ملخص الهيكل الحالي</h4>
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">ملخص الهيكل الحالي</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-slate-50 p-3 rounded-xl text-center">
-                    <span className="block text-2xl font-black text-slate-800">{questions.length}</span>
+                    <span className="block text-xl font-black text-slate-800">{questions.length}</span>
                     <span className="text-[10px] font-bold text-slate-500">الأسئلة</span>
                   </div>
                   <div className="bg-slate-50 p-3 rounded-xl text-center">
-                    <span className="block text-2xl font-black text-slate-800">
+                    <span className="block text-xl font-black text-slate-800">
                       {questions.reduce((sum, q) => sum + q.points, 0)}
                     </span>
                     <span className="text-[10px] font-bold text-slate-500">إجمالي الدرجات</span>
@@ -516,14 +600,14 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
             </aside>
 
             {/* Questions List Workspace */}
-            <div className="flex-1 w-full bg-white rounded-2xl border border-slate-200 p-6 shadow-sm min-h-[450px] flex flex-col">
-              <div className="border-b border-slate-100 pb-4 mb-5 flex justify-between items-center">
+            <div className="flex-1 w-full bg-white rounded-2xl border border-slate-200 p-6 shadow-sm min-h-[450px] flex flex-col text-right">
+              <div className="border-b border-slate-100 pb-4 mb-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div>
                   <h3 className="font-extrabold text-lg text-slate-850">قائمة الأسئلة المُضافة</h3>
                   <p className="text-xs text-slate-500 mt-1">تظهر هنا الأسئلة المضافة للامتحان، يمكنك تعديلها أو حذفها بأي وقت</p>
                 </div>
                 <span className="bg-slate-100 text-slate-700 text-xs px-3 py-1.5 rounded-full font-bold">
-                  توزيع الأسئلة: {questions.filter(q=>q.type==='mcq').length} اختيار متعدد | {questions.filter(q=>q.type==='tf').length} صح وخطأ | {questions.filter(q=>q.type==='essay').length} مقالي
+                  توزيع الأسئلة: {questions.filter(q=>q.type==='mcq').length} اختيار متعدد | {questions.filter(q=>q.type==='tf').length} صح/خطأ | {questions.filter(q=>q.type==='essay').length} مقالي
                 </span>
               </div>
 
@@ -545,7 +629,22 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                         }`}>
                           {q.type === 'mcq' ? 'اختيار من متعدد' : q.type === 'tf' ? 'صح أو خطأ' : 'سؤال مقالي'}
                         </span>
-                        <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                        
+                        {/* Imported from question bank badge */}
+                        {q.sourceQuestionId && (
+                          <span className="text-[10px] bg-violet-100 text-violet-750 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <i className="fas fa-database text-[8px]"></i> مستورد من بنك الأسئلة
+                          </span>
+                        )}
+
+                        {/* Will be saved to bank badge */}
+                        {!q.sourceQuestionId && q.saveToBank && (
+                          <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <i className="fas fa-cloud-upload-alt text-[8px]"></i> سيُحفظ في البنك
+                          </span>
+                        )}
+
+                        <span className="text-xs font-bold text-slate-500 flex items-center gap-1 mr-auto">
                           <i className="fas fa-star text-[10px] text-amber-400"></i> {q.points} درجات
                         </span>
                       </div>
@@ -587,7 +686,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 shrink-0">
                       <button 
                         onClick={() => startEditQuestion(q)}
                         className="w-8 h-8 rounded-lg border border-slate-200 hover:border-primary hover:bg-indigo-50/30 text-slate-500 hover:text-primary flex items-center justify-center transition-all"
@@ -607,13 +706,13 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                 ))}
 
                 {questions.length === 0 && (
-                  <div className="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/30 min-h-[300px]">
+                  <div className="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/30 min-h-[300px] text-center">
                     <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4 animate-pulse">
                       <i className="fas fa-file-signature text-2xl"></i>
                     </div>
                     <h4 className="font-extrabold text-slate-700 text-sm">لم تقم بإضافة أي أسئلة بعد</h4>
-                    <p className="text-xs text-slate-400 text-center max-w-sm mt-1.5 leading-relaxed">
-                      الرجاء استخدام بطاقات أدوات الإضافة الجانبية (اختيار من متعدد، صح أو خطأ، سؤال مقالي) لتصميم وبناء هيكل الامتحان.
+                    <p className="text-xs text-slate-400 text-center max-w-sm mt-1.5 leading-relaxed mx-auto">
+                      الرجاء استخدام بطاقات أدوات الإضافة الجانبية (اختيار من متعدد، صح أو خطأ، سؤال مقالي) لتصميم الامتحان أو الاستيراد مباشرة من بنك الأسئلة.
                     </p>
                   </div>
                 )}
@@ -627,7 +726,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center space-y-6">
               
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl shadow-inner">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl shadow-inner animate-bounce">
                 <i className="fas fa-check-double"></i>
               </div>
 
@@ -690,9 +789,9 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
             </div>
 
             {/* Questions Preview for Final confirmation */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4 text-right">
               <h3 className="font-extrabold text-md text-slate-850 flex items-center gap-2">
-                <i className="fas fa-eye text-primary"></i> مراجعة سريعة للأسئلة
+                <i className="fas fa-eye text-primary"></i> مراجعة سريعة للأسئلة ({questions.length})
               </h3>
               
               <div className="divide-y divide-slate-100">
@@ -704,6 +803,11 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                         <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-bold">
                           {q.type === 'mcq' ? 'اختيار متعدد' : q.type === 'tf' ? 'صح/خطأ' : 'مقالي'}
                         </span>
+                        {q.sourceQuestionId && (
+                          <span className="text-[9px] bg-violet-100 text-violet-750 px-1.5 py-0.5 rounded font-extrabold">
+                            مستورد
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm font-bold text-slate-700 leading-normal">{q.text}</p>
                     </div>
@@ -725,7 +829,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
               onClick={handleBack} 
               className="px-6 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-extrabold text-sm transition-all flex items-center gap-2"
             >
-              <i className="fas fa-chevron-right text-xs"></i> السابق
+              السابق <i className="fas fa-chevron-right text-xs"></i>
             </button>
           )}
         </div>
@@ -813,7 +917,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                 <textarea 
                   value={qText} 
                   onChange={e => setQText(e.target.value)} 
-                  className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-semibold text-slate-800 text-sm" 
+                  className="w-full border border-slate-200 bg-slate-50/50 p-3 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-semibold text-slate-800 text-sm text-right" 
                   rows={3}
                   placeholder="اكتب صيغة السؤال هنا..."
                 ></textarea>
@@ -831,7 +935,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                     {mcqOptions.map((opt, idx) => (
                       <div key={opt.id} className="flex items-center gap-2">
                         {/* Correct Selector */}
-                        <div className="relative flex items-center justify-center">
+                        <div className="relative flex items-center justify-center shrink-0">
                           <input 
                             type="radio" 
                             name="correctAnswer" 
@@ -849,7 +953,7 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                           type="text" 
                           value={opt.text} 
                           onChange={e => setMcqOptions(mcqOptions.map((o, i) => i === idx ? { ...o, text: e.target.value } : o))} 
-                          className={`flex-1 border p-2.5 rounded-xl text-sm transition-all focus:ring-2 ${
+                          className={`flex-1 border p-2.5 rounded-xl text-sm transition-all focus:ring-2 text-right ${
                             opt.isCorrect 
                               ? "border-primary bg-indigo-50/40 text-primary-dark font-bold focus:ring-primary/20" 
                               : "border-slate-200 bg-slate-50/30 text-slate-700 focus:border-primary focus:ring-primary/10"
@@ -923,20 +1027,38 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
               )}
 
               {/* Question Points Input */}
-              <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                <label className="block text-sm font-bold text-slate-700">الدرجة المخصصة للسؤال <span className="text-danger">*</span></label>
-                <div className="relative w-32">
-                  <input 
-                    type="number" 
-                    min="1" 
-                    value={qPoints} 
-                    onChange={e => setQPoints(Math.max(1, Number(e.target.value)))} 
-                    className="w-full border border-slate-200 bg-slate-50/50 p-2.5 pr-10 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800 text-center" 
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs pointer-events-none">
-                    درجات
+              <div className="space-y-3 pt-3 border-t border-slate-100 flex flex-wrap justify-between items-center">
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-bold text-slate-700">الدرجة المخصصة للسؤال <span className="text-danger">*</span></label>
+                  <div className="relative w-32">
+                    <input 
+                      type="number" 
+                      min="1" 
+                      value={qPoints} 
+                      onChange={e => setQPoints(Math.max(1, Number(e.target.value)))} 
+                      className="w-full border border-slate-200 bg-slate-50/50 p-2.5 pr-10 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-bold text-slate-800 text-center" 
+                    />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs pointer-events-none">
+                      درجات
+                    </div>
                   </div>
                 </div>
+
+                {/* SAVE TO QUESTION BANK TOGGLE */}
+                {!editingQuestion?.sourceQuestionId && (
+                  <div className="flex items-center gap-3 mt-4 sm:mt-0 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div className="text-right">
+                      <span className="block text-xs font-extrabold text-slate-800">حفظ في بنك الأسئلة</span>
+                      <span className="text-[9px] text-slate-400 font-normal">إتاحة السؤال للمقرر مستقبلاً</span>
+                    </div>
+                    <div 
+                      onClick={() => setSaveToBank(!saveToBank)}
+                      className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 cursor-pointer ${saveToBank ? "bg-primary" : "bg-slate-200"}`}
+                    >
+                      <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${saveToBank ? "-translate-x-4" : "translate-x-0"}`}></div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -955,6 +1077,168 @@ export default function CreateExamClient({ courses }: { courses: Course[] }) {
                 {editingQuestion ? "تحديث السؤال" : "إضافة السؤال للامتحان"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* QUESTION BANK IMPORT MODAL */}
+      {showBankModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl border border-slate-200 flex flex-col max-h-[85vh]">
+            
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-violet-600 text-white flex items-center justify-center">
+                    <i className="fas fa-database text-xs"></i>
+                  </div>
+                  <div>
+                    <span className="font-extrabold text-slate-800 text-sm block">استيراد الأسئلة من بنك الأسئلة</span>
+                    <span className="text-[10px] text-slate-400 font-bold block mt-0.5">مقرر: {selectedCourseName}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowBankModal(false)} 
+                  className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+
+              {/* Search & Filters */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Search */}
+                <div className="relative flex-1">
+                  <input 
+                    type="text" 
+                    value={searchBankQuery}
+                    onChange={e => setSearchBankQuery(e.target.value)}
+                    className="w-full border border-slate-200 bg-slate-50/50 p-2.5 pr-9 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-semibold text-slate-700 text-xs text-right"
+                    placeholder="ابحث في نصوص الأسئلة..."
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                    <i className="fas fa-search text-xs"></i>
+                  </div>
+                </div>
+                
+                {/* Tabs filter */}
+                <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-bold self-start">
+                  <button 
+                    type="button"
+                    onClick={() => setFilterBankType("all")}
+                    className={`px-3 py-1.5 rounded-lg transition-colors ${filterBankType === "all" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  >
+                    الكل
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setFilterBankType("mcq")}
+                    className={`px-3 py-1.5 rounded-lg transition-colors ${filterBankType === "mcq" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  >
+                    اختيار متعدد
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setFilterBankType("tf")}
+                    className={`px-3 py-1.5 rounded-lg transition-colors ${filterBankType === "tf" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  >
+                    صح/خطأ
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setFilterBankType("essay")}
+                    className={`px-3 py-1.5 rounded-lg transition-colors ${filterBankType === "essay" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  >
+                    مقالي
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body - Questions List */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-3">
+              {filteredBankQuestions.map(bq => {
+                const isAlreadyAdded = questions.some(q => q.sourceQuestionId === bq.id);
+                const isSelected = selectedBankQuestionIds.includes(bq.id);
+
+                return (
+                  <div 
+                    key={bq.id}
+                    onClick={() => !isAlreadyAdded && handleToggleBankQuestion(bq.id)}
+                    className={`border rounded-xl p-4 transition-all flex items-start gap-3 text-right select-none ${
+                      isAlreadyAdded 
+                        ? "bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed" 
+                        : isSelected 
+                        ? "border-violet-500 bg-violet-50/20 cursor-pointer shadow-sm" 
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/30 cursor-pointer"
+                    }`}
+                  >
+                    {/* Selection Indicator */}
+                    <div className="shrink-0 pt-0.5">
+                      {isAlreadyAdded ? (
+                        <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px]">
+                          <i className="fas fa-check"></i>
+                        </div>
+                      ) : (
+                        <div className={`w-5 h-5 rounded-lg border flex items-center justify-center text-xs transition-colors ${
+                          isSelected ? "bg-violet-600 border-transparent text-white" : "border-slate-350 bg-white"
+                        }`}>
+                          {isSelected && <i className="fas fa-check"></i>}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Question Content */}
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
+                          bq.type === 'mcq' ? 'bg-indigo-100 text-primary' : bq.type === 'tf' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {bq.type === 'mcq' ? 'اختيار متعدد' : bq.type === 'tf' ? 'صح أو خطأ' : 'سؤال مقالي'}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400">
+                          درجة السؤال الافتراضية: {bq.points}
+                        </span>
+                        {isAlreadyAdded && (
+                          <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded">
+                            مضاف للامتحان مسبقاً
+                          </span>
+                        )}
+                      </div>
+                      
+                      <p className="text-xs font-bold text-slate-800 leading-relaxed">{bq.text}</p>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {filteredBankQuestions.length === 0 && (
+                <div className="py-12 text-center text-slate-400 flex flex-col items-center justify-center">
+                  <i className="fas fa-database text-2xl mb-2.5 opacity-30 animate-pulse"></i>
+                  <p className="text-xs font-bold">لا توجد أسئلة تطابق الفلاتر في بنك أسئلة هذا المقرر.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">المقرر الدراسي الحالي يحتوي على أسئلة بنك مخصصة فقط للكود المختار.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-100 flex justify-end gap-2 bg-slate-50">
+              <button 
+                onClick={() => setShowBankModal(false)} 
+                className="px-5 py-2.5 border border-slate-200 hover:bg-slate-150 rounded-xl font-bold text-sm text-slate-650 transition-colors"
+              >
+                إلغاء
+              </button>
+              <button 
+                onClick={handleImportSelected}
+                disabled={selectedBankQuestionIds.length === 0}
+                className="px-6 py-2.5 bg-violet-600 hover:bg-violet-750 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-violet-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                استيراد الأسئلة المختارة ({selectedBankQuestionIds.length})
+              </button>
+            </div>
+
           </div>
         </div>
       )}

@@ -20,5 +20,27 @@ export default async function CreateExamPage() {
     courses = await prisma.course.findMany();
   }
 
-  return <CreateExamClient courses={courses} />;
+  // Fetch question bank questions for these courses
+  let questionBank: any[] = [];
+  if (user) {
+    questionBank = await prisma.question.findMany({
+      where: {
+        courseId: { in: courses.map(c => c.id) },
+        isActive: true
+      },
+      orderBy: { createdAt: "desc" }
+    });
+  }
+
+  // Serialize and map question type & default points safely
+  const serializedQuestionBank = questionBank.map(q => ({
+    id: q.id,
+    courseId: q.courseId,
+    type: (q.questionType === "MCQ" ? "mcq" : q.questionType === "TRUE_FALSE" ? "tf" : "essay") as "mcq" | "tf" | "essay",
+    text: q.text,
+    points: Number(q.defaultPoints),
+    options: q.choicesPayload ? JSON.parse(JSON.stringify(q.choicesPayload)) : null
+  }));
+
+  return <CreateExamClient courses={courses} questionBank={serializedQuestionBank} />;
 }

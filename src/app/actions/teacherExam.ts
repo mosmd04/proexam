@@ -33,26 +33,33 @@ export async function saveExam(examData: any) {
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i];
 
-    // Create the question in the question bank
-    const sourceQuestion = await prisma.question.create({
-      data: {
-        courseId,
-        createdById: user.id,
-        questionType: q.type === "mcq" ? "MCQ" : q.type === "tf" ? "TRUE_FALSE" : "ESSAY",
-        text: q.text,
-        choicesPayload: q.options || q.choicesPayload,
-        defaultPoints: q.points,
-      }
-    });
+    let sourceQuestionId: string | null = q.sourceQuestionId || null;
+    const questionTypeDb = q.type === "mcq" ? "MCQ" : q.type === "tf" ? "TRUE_FALSE" : "ESSAY";
+    const choicesPayloadDb = q.options || q.choicesPayload;
+
+    // Save to question bank only if it's new and user toggled saveToBank: true
+    if (!sourceQuestionId && q.saveToBank) {
+      const sourceQuestion = await prisma.question.create({
+        data: {
+          courseId,
+          createdById: user.id,
+          questionType: questionTypeDb,
+          text: q.text,
+          choicesPayload: choicesPayloadDb,
+          defaultPoints: q.points,
+        }
+      });
+      sourceQuestionId = sourceQuestion.id;
+    }
 
     // Create the snapshot for the exam
     await prisma.examQuestion.create({
       data: {
         examId: exam.id,
-        sourceQuestionId: sourceQuestion.id,
-        questionType: sourceQuestion.questionType,
-        text: sourceQuestion.text,
-        choicesPayload: sourceQuestion.choicesPayload ? JSON.parse(JSON.stringify(sourceQuestion.choicesPayload)) : undefined,
+        sourceQuestionId: sourceQuestionId,
+        questionType: questionTypeDb,
+        text: q.text,
+        choicesPayload: choicesPayloadDb ? JSON.parse(JSON.stringify(choicesPayloadDb)) : undefined,
         points: q.points,
         sortOrder: i,
       }

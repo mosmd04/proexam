@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المراجعة والنشر - إنشاء امتحان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo
+                        secondary: '#10B981', // Emerald
+                        dark: '#111827', // Gray 900
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        success: '#10B981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Radio Card Selection Styles */
+        .publish-radio:checked + div {
+            border-color: #4F46E5;
+            background-color: #EEF2FF;
+        }
+        .publish-radio:checked + div .radio-icon {
+            color: #4F46E5;
+        }
+        .publish-radio:checked + div .check-circle {
+            border-color: #4F46E5;
+            background-color: #4F46E5;
+        }
+        .publish-radio:checked + div .check-circle::after {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            margin: 4px auto;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100">
+
+    <!-- القائمة الجانبية الشاملة -->
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800 shrink-0">
+            <div class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-graduation-cap text-primary"></i>
+                <span>بوابة المعلم</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6">
+            <nav class="space-y-1.5 px-4">
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3 px-2">القائمة الرئيسية</p>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-home text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    الرئيسية
+                </a>
+                
+                <!-- العنصر النشط: إدارة الامتحانات -->
+                <a href="#" class="bg-primary text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors shadow-md shadow-indigo-900/50">
+                    <i class="fas fa-edit text-lg w-6 text-center ml-2"></i>
+                    إدارة الامتحانات
+                </a>
+
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-database text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    بنك الأسئلة
+                </a>
+
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-video text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    المراقبة الحية
+                </a>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-users text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    الطلاب والنتائج
+                </a>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-chart-pie text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    التقارير والإحصائيات
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 flex items-center gap-3 shrink-0 hover:bg-gray-800 cursor-pointer transition-colors">
+            <div class="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center text-white font-bold relative">
+                د.م
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-dark rounded-full"></span>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-bold text-white truncate">د. محمود عبدالله</p>
+                <p class="text-xs text-gray-400 truncate">أستاذ مشارك - علوم الحاسب</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-20 relative">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">إنشاء امتحان جديد</h1>
+                <p class="text-sm text-gray-500 mt-0.5">امتحان منتصف الفصل - هياكل البيانات (CS301)</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="text-gray-500 hover:text-gray-800 font-bold text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-xl transition-colors">
+                    إلغاء الإنشاء
+                </button>
+            </div>
+        </header>
+
+        <!-- Stepper (شريط الخطوات) -->
+        <div class="bg-white border-b border-gray-100 px-6 py-4 shrink-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.02)] z-10 relative">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center justify-between relative">
+                    <!-- خط الخلفية -->
+                    <div class="absolute top-1/2 right-0 left-0 h-1 bg-gray-100 -z-10 transform -translate-y-1/2 rounded-full"></div>
+                    <!-- خط التقدم الملون (واقف عند الخطوة 3 - مكتمل) -->
+                    <div class="absolute top-1/2 right-0 w-full h-1 bg-primary -z-10 transform -translate-y-1/2 rounded-full transition-all duration-500"></div>
+
+                    <!-- Step 1 (Completed) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative cursor-pointer group">
+                        <div class="w-10 h-10 rounded-full bg-success text-white flex items-center justify-center text-lg font-bold shadow-sm ring-4 ring-white group-hover:bg-emerald-600 transition-colors">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="text-sm font-bold text-gray-700">الإعدادات</span>
+                    </div>
+
+                    <!-- Step 2 (Completed) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative cursor-pointer group">
+                        <div class="w-10 h-10 rounded-full bg-success text-white flex items-center justify-center text-lg font-bold shadow-sm ring-4 ring-white group-hover:bg-emerald-600 transition-colors">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="text-sm font-bold text-gray-700">الأسئلة</span>
+                    </div>
+
+                    <!-- Step 3 (Active) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative">
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-lg font-bold shadow-md shadow-indigo-200 ring-4 ring-white">
+                            3
+                        </div>
+                        <span class="text-sm font-bold text-primary">المراجعة والنشر</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- محتوى المراجعة -->
+        <main class="flex-1 overflow-y-auto p-6 scroll-smooth">
+            <div class="max-w-4xl mx-auto space-y-6 pb-24">
+                
+                <!-- رسالة التأكيد العلوية -->
+                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-white text-primary flex items-center justify-center text-xl shrink-0 shadow-sm border border-indigo-50 mt-1">
+                        <i class="fas fa-flag-checkered"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-indigo-900 mb-1">الامتحان جاهز تقريباً!</h2>
+                        <p class="text-sm text-indigo-700 leading-relaxed">
+                            لقد قمت بإعداد الأسئلة بنجاح. يرجى مراجعة الملخص أدناه وتحديد الفصول المستهدفة ووقت النشر لتفعيل الامتحان.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 1. ملخص الامتحان (بطاقات إحصائية) -->
+                <section>
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">1. ملخص المحتوى</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 shadow-sm">
+                            <div class="w-12 h-12 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-xl"><i class="fas fa-list-ol"></i></div>
+                            <div>
+                                <p class="text-xs text-gray-500 font-bold mb-1">إجمالي الأسئلة</p>
+                                <p class="text-xl font-black text-gray-800">30 <span class="text-sm font-medium text-gray-500">سؤال</span></p>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 shadow-sm">
+                            <div class="w-12 h-12 rounded-lg bg-indigo-50 text-primary flex items-center justify-center text-xl"><i class="fas fa-bullseye"></i></div>
+                            <div>
+                                <p class="text-xs text-gray-500 font-bold mb-1">الدرجة الكلية</p>
+                                <p class="text-xl font-black text-gray-800">100 <span class="text-sm font-medium text-gray-500">درجة</span></p>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 shadow-sm">
+                            <div class="w-12 h-12 rounded-lg bg-orange-50 text-warning flex items-center justify-center text-xl"><i class="far fa-clock"></i></div>
+                            <div>
+                                <p class="text-xs text-gray-500 font-bold mb-1">المدة المحددة</p>
+                                <p class="text-xl font-black text-gray-800">60 <span class="text-sm font-medium text-gray-500">دقيقة</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. السياسات والإعدادات (قراءة فقط) -->
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-sliders-h text-primary"></i> سياسات الامتحان المعتمدة
+                        </h3>
+                        <button class="text-sm text-primary font-bold hover:underline">تعديل الإعدادات</button>
+                    </div>
+                    
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-success mt-0.5"></i>
+                            <div>
+                                <span class="font-bold text-gray-700 block">ترتيب عشوائي للأسئلة</span>
+                                <span class="text-xs text-gray-500">مفعل (يمنع تطابق النماذج بين الطلاب)</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-success mt-0.5"></i>
+                            <div>
+                                <span class="font-bold text-gray-700 block">المتصفح الآمن (Kiosk Mode)</span>
+                                <span class="text-xs text-gray-500">مفعل (يمنع فتح نوافذ أخرى أثناء الامتحان)</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-times-circle text-gray-300 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold text-gray-500 block">إظهار النتيجة فوراً</span>
+                                <span class="text-xs text-gray-400">معطل (ستظهر النتيجة بعد اعتمادها يدوياً)</span>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- 3. الاستهداف والنشر (إجراءات) -->
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2 mb-6">
+                        <i class="fas fa-paper-plane text-primary"></i> الفصول وخيارات النشر
+                    </h3>
+                    
+                    <div class="space-y-6">
+                        
+                        <!-- تحديد الفصول -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-3">حدد الفصول / المجموعات (Sections) المستهدفة <span class="text-danger">*</span></label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <!-- Checkbox Item 1 -->
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input type="checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary" checked>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-800">مجموعة A (Section A)</span>
+                                        <span class="text-xs text-gray-500">45 طالب</span>
+                                    </div>
+                                </label>
+                                <!-- Checkbox Item 2 -->
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input type="checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary" checked>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-800">مجموعة B (Section B)</span>
+                                        <span class="text-xs text-gray-500">42 طالب</span>
+                                    </div>
+                                </label>
+                                <!-- Checkbox Item 3 -->
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input type="checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-800">طلاب الملحق (Retake)</span>
+                                        <span class="text-xs text-gray-500">12 طالب</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-100">
+
+                        <!-- خيارات النشر (Radio Cards) -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-3">متى تريد نشر الامتحان؟ <span class="text-danger">*</span></label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                
+                                <!-- خيار النشر الفوري -->
+                                <label class="relative block cursor-pointer">
+                                    <input type="radio" name="publish_type" class="publish-radio sr-only">
+                                    <div class="border-2 border-gray-200 rounded-xl p-5 transition-all hover:bg-gray-50 h-full">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-bolt text-gray-400 text-xl radio-icon transition-colors"></i>
+                                                <span class="font-bold text-gray-800">نشر فوري (الآن)</span>
+                                            </div>
+                                            <div class="check-circle w-5 h-5 border-2 border-gray-300 rounded-full transition-colors"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-500 leading-relaxed rtl:pr-8 ltr:pl-8">
+                                            سيظهر الامتحان فوراً للطلاب المحددين ويمكنهم الدخول إليه الآن. (يُستخدم للامتحانات المفاجئة أو العملية).
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <!-- خيار الجدولة -->
+                                <label class="relative block cursor-pointer">
+                                    <input type="radio" name="publish_type" class="publish-radio sr-only" checked>
+                                    <div class="border-2 border-gray-200 rounded-xl p-5 transition-all hover:bg-gray-50 h-full">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div class="flex items-center gap-3">
+                                                <i class="far fa-calendar-alt text-gray-400 text-xl radio-icon transition-colors"></i>
+                                                <span class="font-bold text-gray-800">جدولة لوقت لاحق</span>
+                                            </div>
+                                            <div class="check-circle w-5 h-5 border-2 border-gray-300 rounded-full transition-colors"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-500 leading-relaxed rtl:pr-8 ltr:pl-8 mb-4">
+                                            سيظهر الامتحان في قائمة "الامتحانات القادمة" للطالب، ولن يُفتح إلا في الموعد المحدد.
+                                        </p>
+                                        
+                                        <!-- حقول التاريخ والوقت (تظهر عندما يكون هذا الخيار مفعلاً) -->
+                                        <div class="rtl:pr-8 ltr:pl-8 grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-gray-500 mb-1">يوم الامتحان</label>
+                                                <input type="date" class="w-full text-sm border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-primary outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-gray-500 mb-1">ساعة البدء</label>
+                                                <input type="time" class="w-full text-sm border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-primary outline-none">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Sticky Footer for Actions -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.08)] md:pl-6 md:pr-72 z-30 transition-all">
+            <button class="px-6 py-2.5 text-gray-600 font-bold text-sm hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-2 border border-gray-200 hover:border-gray-300 bg-white shadow-sm">
+                <i class="fas fa-arrow-right"></i> العودة للأسئلة
+            </button>
+            <div class="flex items-center gap-3">
+                <button class="px-6 py-2.5 text-gray-600 font-bold text-sm hover:bg-gray-100 rounded-xl transition-colors hidden sm:block">
+                    حفظ كمسودة
+                </button>
+                <!-- الزر النهائي -->
+                <button class="px-8 py-2.5 bg-success hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-200 transition-colors flex items-center gap-2">
+                    اعتماد ونشر الامتحان <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

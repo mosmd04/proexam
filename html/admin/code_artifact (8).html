@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعدادات المنظومة - الإدارة العليا</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Cairo', 'sans-serif']
+                    },
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#10B981', // Emerald 500
+                        dark: '#0F172A', // Slate 900
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        info: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* تأثير تبويبات الإعدادات */
+        .settings-tab-active {
+            background-color: #EEF2FF;
+            color: #4F46E5;
+            border-right: 3px solid #4F46E5;
+            font-weight: 700;
+        }
+        .settings-tab-active i { color: #4F46E5; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary rounded-full mix-blend-multiply filter blur-2xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+        
+        <div class="h-16 flex items-center justify-center border-b border-slate-800 relative z-10">
+            <div class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-shield-alt text-primary"></i>
+                <span>الإدارة العليا</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6 relative z-10">
+            <nav class="space-y-1 px-4">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 px-2">إدارة النظام</p>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors">
+                    <i class="fas fa-chart-line text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    نظرة عامة
+                </a>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-users-cog text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    المستخدمين والصلاحيات
+                </a>
+
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-university text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    الكليات والأقسام
+                </a>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-server text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    حالة الخوادم
+                </a>
+                
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 mt-6 px-2">الإعدادات</p>
+
+                <!-- Active Item -->
+                <a href="#" class="bg-primary/10 border border-primary/20 text-indigo-400 group flex items-center px-3 py-2.5 text-sm font-bold rounded-xl transition-colors shadow-sm mt-1">
+                    <i class="fas fa-cog text-lg w-6 text-center ml-2"></i>
+                    إعدادات المنظومة
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-800 flex items-center gap-3 relative z-10 bg-slate-900/50">
+            <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-white font-bold">
+                ع.م
+            </div>
+            <div>
+                <p class="text-sm font-bold text-white">عمر مصطفى</p>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_5px_#10B981]"></span>
+                    <p class="text-xs text-slate-400">مدير النظام (Super Admin)</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
+        
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    إعدادات المنظومة
+                </h1>
+                <p class="text-sm text-slate-500 mt-0.5">التحكم في القواعد العامة، الأمان، وسياسات النظام</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button class="px-4 py-2 bg-white border border-slate-300 text-slate-600 hover:text-danger hover:border-red-200 hover:bg-red-50 rounded-xl text-sm font-bold transition-colors flex items-center gap-2">
+                    <i class="fas fa-undo-alt"></i> استعادة الافتراضي
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-hidden p-6">
+            <div class="max-w-7xl mx-auto flex flex-col lg:flex-row h-full gap-6">
+
+                <!-- القائمة الجانبية للإعدادات -->
+                <aside class="w-full lg:w-72 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col shrink-0 overflow-hidden h-fit">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
+                        <h3 class="font-bold text-slate-800">أقسام الإعدادات</h3>
+                    </div>
+                    
+                    <div class="py-2 flex flex-col">
+                        <!-- Tab 1 -->
+                        <a href="#" class="text-slate-600 hover:bg-slate-50 flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition-colors border-r-3 border-transparent">
+                            <i class="fas fa-sliders-h text-lg w-5 text-center text-slate-400"></i>
+                            إعدادات عامة
+                        </a>
+                        <!-- Tab 2 (Active) -->
+                        <a href="#" class="settings-tab-active flex items-center gap-3 px-5 py-3.5 text-sm transition-colors">
+                            <i class="fas fa-shield-alt text-lg w-5 text-center"></i>
+                            الأمان والخصوصية
+                        </a>
+                        <!-- Tab 3 -->
+                        <a href="#" class="text-slate-600 hover:bg-slate-50 flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition-colors border-r-3 border-transparent">
+                            <i class="fas fa-gavel text-lg w-5 text-center text-slate-400"></i>
+                            سياسات الامتحانات
+                        </a>
+                        <!-- Tab 4 -->
+                        <a href="#" class="text-slate-600 hover:bg-slate-50 flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition-colors border-r-3 border-transparent">
+                            <i class="fas fa-envelope-open-text text-lg w-5 text-center text-slate-400"></i>
+                            البريد والإشعارات
+                        </a>
+                        <!-- Tab 5 -->
+                        <a href="#" class="text-slate-600 hover:bg-slate-50 flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition-colors border-r-3 border-transparent">
+                            <i class="fas fa-paint-roller text-lg w-5 text-center text-slate-400"></i>
+                            المظهر والهوية
+                        </a>
+                        <!-- Tab 6 -->
+                        <a href="#" class="text-slate-600 hover:bg-slate-50 flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition-colors border-r-3 border-transparent">
+                            <i class="fas fa-plug text-lg w-5 text-center text-slate-400"></i>
+                            الربط البرمجي (API)
+                        </a>
+                    </div>
+                </aside>
+
+                <section class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden relative">
+                    
+                    <div class="p-6 border-b border-slate-100 bg-white shrink-0">
+                        <h2 class="text-xl font-bold text-slate-800">الأمان والخصوصية</h2>
+                        <p class="text-sm text-slate-500 mt-1">تكوين سياسات تسجيل الدخول، الجلسات النشطة، وقواعد الوصول لضمان حماية بيانات المنظومة.</p>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-50/30">
+                        
+                        <!-- القسم الأول: سياسات تسجيل الدخول -->
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-key text-primary"></i> سياسات الدخول وكلمات المرور
+                            </h3>
+                            
+                            <div class="bg-white rounded-xl border border-slate-100 shadow-sm divide-y divide-slate-100">
+                                
+                                <div class="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm">المصادقة الثنائية (2FA) للإدارة</h4>
+                                        <p class="text-xs text-slate-500 mt-1">فرض استخدام تطبيق Google Authenticator على جميع المدراء والمشرفين عند تسجيل الدخول.</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+
+                                <div class="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                    <div class="flex-1 pr-6">
+                                        <h4 class="font-bold text-slate-800 text-sm">قوة كلمة المرور (لجميع المستخدمين)</h4>
+                                        <p class="text-xs text-slate-500 mt-1">يجب أن تحتوي على حروف كبيرة، صغيرة، أرقام ورموز خاصة.</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+
+                                <div class="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm">الحد الأقصى لمحاولات الدخول الخاطئة</h4>
+                                        <p class="text-xs text-slate-500 mt-1">يتم قفل الحساب مؤقتاً بعد تخطي هذا العدد من المحاولات الفاشلة.</p>
+                                    </div>
+                                    <div class="shrink-0">
+                                        <select class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary outline-none font-bold text-slate-700 cursor-pointer">
+                                            <option value="3">3 محاولات</option>
+                                            <option value="5" selected>5 محاولات</option>
+                                            <option value="10">10 محاولات</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- القسم الثاني: إدارة الجلسات (Sessions) -->
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-clock text-primary"></i> إدارة الجلسات النشطة
+                            </h3>
+                            
+                            <div class="bg-white rounded-xl border border-slate-100 shadow-sm divide-y divide-slate-100">
+                                
+                                <div class="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm">منع الدخول المزدوج (Concurrent Logins)</h4>
+                                        <p class="text-xs text-slate-500 mt-1">يمنع الطالب من تسجيل الدخول من متصفحين أو جهازين مختلفين في نفس الوقت.</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+                                    </label>
+                                </div>
+
+                                <div class="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm">مهلة الجلسة الخاملة (Idle Timeout)</h4>
+                                        <p class="text-xs text-slate-500 mt-1">يتم تسجيل الخروج تلقائياً إذا لم يقم المستخدم بأي إجراء لفترة محددة.</p>
+                                    </div>
+                                    <div class="shrink-0">
+                                        <select class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary outline-none font-bold text-slate-700 cursor-pointer">
+                                            <option value="15">15 دقيقة</option>
+                                            <option value="30" selected>30 دقيقة</option>
+                                            <option value="60">ساعة واحدة</option>
+                                            <option value="never">تعطيل</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- القسم الثالث: التحكم في الوصول (Access Control) -->
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-network-wired text-primary"></i> شبكة الاتصال والوصول
+                            </h3>
+                            
+                            <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-bold text-slate-800 text-sm">تقييد دخول الإدارة بعناوين IP محددة (IP Whitelisting)</h4>
+                                        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                            <input type="checkbox" class="sr-only peer">
+                                            <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-danger"></div>
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mb-3">إذا تم تفعيله، لن يتمكن حسابات الـ Super Admin من الدخول إلا من خلال العناوين المدرجة أدناه.</p>
+                                    
+                                    <textarea rows="3" placeholder="أدخل عناوين IP مفصولة بفاصلة (مثال: 192.168.1.1, 10.0.0.5)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-slate-800 font-mono" dir="ltr" disabled></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- شريط الحفظ السفلي العائم -->
+                    <div class="p-4 border-t border-slate-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex items-center justify-between z-10">
+                        <p class="text-xs text-slate-500 font-medium">آخر تعديل: اليوم، 11:45 صباحاً بواسطة <span class="font-bold text-slate-700">عمر مصطفى</span></p>
+                        <div class="flex gap-3">
+                            <button class="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors">
+                                إلغاء التغييرات
+                            </button>
+                            <button class="px-6 py-2.5 bg-primary hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-colors flex items-center gap-2">
+                                <i class="fas fa-save"></i> حفظ الإعدادات
+                            </button>
+                        </div>
+                    </div>
+
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقارير والإحصائيات - بوابة المعلم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo
+                        secondary: '#10B981', // Emerald
+                        dark: '#111827', // Gray 900
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        info: '#3B82F6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F3F4F6; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .table-row-hover:hover td { background-color: #F9FAFB; transition: background-color 0.2s ease; }
+        
+        /* Bar Chart Animations */
+        .bar-fill { animation: growUp 1s ease-out forwards; transform-origin: bottom; }
+        @keyframes growUp {
+            0% { transform: scaleY(0); }
+            100% { transform: scaleY(1); }
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800 relative overflow-hidden">
+            <div class="absolute inset-0 bg-primary opacity-10"></div>
+            <div class="text-xl font-bold text-white flex items-center gap-2 relative z-10">
+                <i class="fas fa-graduation-cap text-primary"></i>
+                <span>بوابة المعلم</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6">
+            <nav class="space-y-2 px-4">
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2 px-2">القائمة الرئيسية</p>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-home text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary"></i>
+                    اللوحة الرئيسية
+                </a>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-edit text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary"></i>
+                    إدارة الامتحانات
+                </a>
+
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-database text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary"></i>
+                    بنك الأسئلة
+                </a>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-users text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary"></i>
+                    الطلاب والنتائج
+                </a>
+                
+                <!-- Active Item -->
+                <a href="#" class="bg-primary text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors shadow-md shadow-indigo-900/50">
+                    <i class="fas fa-chart-pie text-lg w-6 text-center ml-2"></i>
+                    التقارير والإحصائيات
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center text-white font-bold relative">
+                د.م
+                <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-secondary border-2 border-gray-800 rounded-full"></span>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-white">د. محمود عبدالله</p>
+                <p class="text-xs text-gray-400">قسم علوم الحاسب</p>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50/50">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between shrink-0 shadow-sm z-10 gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">التحليل والإحصائيات الشاملة</h1>
+                <p class="text-sm text-gray-500 mt-0.5">نظرة عامة على الأداء الأكاديمي للطلاب في مقرراتك</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <select class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-primary outline-none py-2 px-4 transition-colors font-bold cursor-pointer">
+                    <option>الفصل الحالي (خريف 2026)</option>
+                    <option>الفصل السابق (ربيع 2026)</option>
+                    <option>جميع الفصول</option>
+                </select>
+                <button class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-xl text-sm font-bold shadow-md transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i class="fas fa-print"></i> طباعة التقرير
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6">
+            <div class="max-w-7xl mx-auto space-y-6">
+
+                <!-- Overall KPIs -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between h-32">
+                        <div class="flex justify-between items-start">
+                            <p class="text-gray-500 text-sm font-bold">المتوسط العام</p>
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-primary flex items-center justify-center"><i class="fas fa-chart-line"></i></div>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <p class="text-3xl font-black text-gray-800" dir="ltr">82.4%</p>
+                            <span class="text-xs font-bold text-secondary flex items-center gap-0.5"><i class="fas fa-arrow-up"></i> 3.2%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between h-32">
+                        <div class="flex justify-between items-start">
+                            <p class="text-gray-500 text-sm font-bold">إجمالي الطلاب</p>
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-info flex items-center justify-center"><i class="fas fa-users"></i></div>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <p class="text-3xl font-black text-gray-800">145</p>
+                            <span class="text-xs font-medium text-gray-400">طالب تم تقييمهم</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between h-32">
+                        <div class="flex justify-between items-start">
+                            <p class="text-gray-500 text-sm font-bold">نسبة النجاح العامة</p>
+                            <div class="w-8 h-8 rounded-lg bg-green-50 text-secondary flex items-center justify-center"><i class="fas fa-check-double"></i></div>
+                        </div>
+                        <div class="w-full">
+                            <div class="flex items-baseline justify-between mb-1">
+                                <p class="text-3xl font-black text-gray-800" dir="ltr">88%</p>
+                            </div>
+                            <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-secondary h-full rounded-full" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between h-32">
+                        <div class="flex justify-between items-start">
+                            <p class="text-gray-500 text-sm font-bold">امتحانات أُنجزت</p>
+                            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center"><i class="fas fa-file-alt"></i></div>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <p class="text-3xl font-black text-gray-800">12</p>
+                            <span class="text-xs font-medium text-gray-400">هذا الفصل</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Chart 1: Grade Distribution (Histogram) -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-[350px]">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="font-bold text-gray-800">توزيع التقديرات (Grade Distribution)</h3>
+                                <p class="text-xs text-gray-500 mt-1">توزيع درجات الطلاب لجميع المقررات الحالية</p>
+                            </div>
+                            <div class="flex gap-2 text-xs font-bold">
+                                <span class="flex items-center gap-1 text-gray-500"><div class="w-3 h-3 rounded bg-primary"></div> ذكور</span>
+                                <span class="flex items-center gap-1 text-gray-500"><div class="w-3 h-3 rounded bg-indigo-300"></div> إناث</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom CSS Bar Chart -->
+                        <div class="flex-1 flex items-end justify-between gap-2 lg:gap-4 relative pt-4 pb-2 border-b border-gray-100">
+                            <!-- Y-axis Guidelines -->
+                            <div class="absolute inset-0 flex flex-col justify-between z-0 pointer-events-none">
+                                <div class="w-full h-px bg-gray-100 border-dashed"></div>
+                                <div class="w-full h-px bg-gray-100 border-dashed"></div>
+                                <div class="w-full h-px bg-gray-100 border-dashed"></div>
+                                <div class="w-full h-px bg-gray-100 border-dashed"></div>
+                            </div>
+                            
+                            <!-- Bars (A) -->
+                            <div class="flex-1 flex flex-col items-center gap-2 z-10 group cursor-pointer">
+                                <div class="w-full flex items-end justify-center gap-1 h-48 relative">
+                                    <div class="w-1/3 bg-primary rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 45%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">15</span>
+                                    </div>
+                                    <div class="w-1/3 bg-indigo-300 rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 60%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">20</span>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-1 rounded w-full text-center">A (+90)</span>
+                            </div>
+
+                            <!-- Bars (B) -->
+                            <div class="flex-1 flex flex-col items-center gap-2 z-10 group cursor-pointer">
+                                <div class="w-full flex items-end justify-center gap-1 h-48 relative">
+                                    <div class="w-1/3 bg-primary rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 85%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">35</span>
+                                    </div>
+                                    <div class="w-1/3 bg-indigo-300 rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 75%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">28</span>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-1 rounded w-full text-center">B (+80)</span>
+                            </div>
+
+                            <!-- Bars (C) -->
+                            <div class="flex-1 flex flex-col items-center gap-2 z-10 group cursor-pointer">
+                                <div class="w-full flex items-end justify-center gap-1 h-48 relative">
+                                    <div class="w-1/3 bg-primary rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 40%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">12</span>
+                                    </div>
+                                    <div class="w-1/3 bg-indigo-300 rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 50%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">18</span>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-1 rounded w-full text-center">C (+70)</span>
+                            </div>
+
+                            <!-- Bars (D) -->
+                            <div class="flex-1 flex flex-col items-center gap-2 z-10 group cursor-pointer">
+                                <div class="w-full flex items-end justify-center gap-1 h-48 relative">
+                                    <div class="w-1/3 bg-primary rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 15%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">5</span>
+                                    </div>
+                                    <div class="w-1/3 bg-indigo-300 rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 10%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">3</span>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-1 rounded w-full text-center">D (+60)</span>
+                            </div>
+
+                            <!-- Bars (F) -->
+                            <div class="flex-1 flex flex-col items-center gap-2 z-10 group cursor-pointer">
+                                <div class="w-full flex items-end justify-center gap-1 h-48 relative">
+                                    <div class="w-1/3 bg-danger rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 25%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-danger opacity-0 group-hover:opacity-100 transition-opacity">9</span>
+                                    </div>
+                                    <div class="w-1/3 bg-red-300 rounded-t-sm bar-fill opacity-90 group-hover:opacity-100 transition-opacity relative" style="height: 5%;">
+                                        <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-danger opacity-0 group-hover:opacity-100 transition-opacity">2</span>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-danger bg-red-50 px-3 py-1 rounded w-full text-center">F (رسوب)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item Analysis (أسئلة صعبة) -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[350px]">
+                        <div class="p-5 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                                <i class="fas fa-exclamation-triangle text-warning"></i> أسئلة تحتاج لمراجعة
+                            </h3>
+                            <p class="text-xs text-gray-500 mt-1">أكثر الأسئلة التي أخطأ فيها الطلاب مؤخراً</p>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                            
+                            <!-- Question Item -->
+                            <div class="border border-gray-100 rounded-xl p-3 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-start justify-between gap-2">
+                                    <p class="text-sm font-bold text-gray-800 line-clamp-2">ما هو التعقيد الزمني لخوارزمية QuickSort في أسوأ الحالات؟</p>
+                                    <span class="bg-red-50 text-danger text-[10px] font-bold px-2 py-0.5 rounded whitespace-nowrap">68% خطأ</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2"><span class="font-bold">المقرر:</span> هياكل البيانات</p>
+                                <button class="text-primary text-xs font-bold mt-2 hover:underline">عرض الإجابات الخاطئة للطلاب</button>
+                            </div>
+
+                            <!-- Question Item -->
+                            <div class="border border-gray-100 rounded-xl p-3 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-start justify-between gap-2">
+                                    <p class="text-sm font-bold text-gray-800 line-clamp-2">في النموذج العلائقي (Relational Model)، ماذا يمثل المفتاح الأجنبي (Foreign Key)؟</p>
+                                    <span class="bg-red-50 text-danger text-[10px] font-bold px-2 py-0.5 rounded whitespace-nowrap">55% خطأ</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2"><span class="font-bold">المقرر:</span> قواعد البيانات</p>
+                                <button class="text-primary text-xs font-bold mt-2 hover:underline">عرض الإجابات الخاطئة للطلاب</button>
+                            </div>
+
+                            <!-- Question Item -->
+                            <div class="border border-gray-100 rounded-xl p-3 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-start justify-between gap-2">
+                                    <p class="text-sm font-bold text-gray-800 line-clamp-2">أي من أنماط التصميم (Design Patterns) يستخدم لضمان إنشاء كائن واحد فقط من فئة معينة؟</p>
+                                    <span class="bg-orange-50 text-warning text-[10px] font-bold px-2 py-0.5 rounded whitespace-nowrap">42% خطأ</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2"><span class="font-bold">المقرر:</span> هندسة البرمجيات</p>
+                                <button class="text-primary text-xs font-bold mt-2 hover:underline">عرض الإجابات الخاطئة للطلاب</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Exams Comparison -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                        <h3 class="font-bold text-gray-800">مقارنة أداء الامتحانات السابقة</h3>
+                        <button class="text-sm text-primary font-bold hover:underline">عرض كل السجلات</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right whitespace-nowrap">
+                            <thead class="bg-white border-b border-gray-100 text-gray-500 text-xs uppercase font-bold tracking-wider">
+                                <tr>
+                                    <th class="p-4">اسم الامتحان / المقرر</th>
+                                    <th class="p-4 text-center">الحضور</th>
+                                    <th class="p-4 text-center">أعلى درجة</th>
+                                    <th class="p-4 text-center">أدنى درجة</th>
+                                    <th class="p-4 text-center">المتوسط</th>
+                                    <th class="p-4 text-center">نسبة النجاح</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50 text-sm font-medium text-gray-700">
+                                <tr class="table-row-hover bg-white">
+                                    <td class="p-4">
+                                        <p class="font-bold text-gray-800">امتحان منتصف الفصل</p>
+                                        <p class="text-xs text-gray-500">هياكل البيانات (CS301)</p>
+                                    </td>
+                                    <td class="p-4 text-center text-gray-600">42/45</td>
+                                    <td class="p-4 text-center text-success font-bold" dir="ltr">98%</td>
+                                    <td class="p-4 text-center text-danger font-bold" dir="ltr">42%</td>
+                                    <td class="p-4 text-center">
+                                        <span class="bg-gray-100 px-2 py-1 rounded text-gray-800 font-bold" dir="ltr">78%</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="inline-flex items-center gap-1.5 text-secondary text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-secondary"></span> 85%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="table-row-hover bg-white">
+                                    <td class="p-4">
+                                        <p class="font-bold text-gray-800">الاختبار القصير الأول (Quiz 1)</p>
+                                        <p class="text-xs text-gray-500">قواعد البيانات (CS305)</p>
+                                    </td>
+                                    <td class="p-4 text-center text-gray-600">80/82</td>
+                                    <td class="p-4 text-center text-success font-bold" dir="ltr">100%</td>
+                                    <td class="p-4 text-center text-danger font-bold" dir="ltr">60%</td>
+                                    <td class="p-4 text-center">
+                                        <span class="bg-gray-100 px-2 py-1 rounded text-gray-800 font-bold" dir="ltr">88%</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="inline-flex items-center gap-1.5 text-secondary text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-secondary"></span> 96%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="table-row-hover bg-white">
+                                    <td class="p-4">
+                                        <p class="font-bold text-gray-800">الامتحان العملي النصفي</p>
+                                        <p class="text-xs text-gray-500">هندسة البرمجيات (CS401)</p>
+                                    </td>
+                                    <td class="p-4 text-center text-gray-600">30/30</td>
+                                    <td class="p-4 text-center text-success font-bold" dir="ltr">95%</td>
+                                    <td class="p-4 text-center text-danger font-bold" dir="ltr">35%</td>
+                                    <td class="p-4 text-center">
+                                        <span class="bg-gray-100 px-2 py-1 rounded text-gray-800 font-bold" dir="ltr">71%</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="inline-flex items-center gap-1.5 text-warning text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-warning"></span> 68%
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

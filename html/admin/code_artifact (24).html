@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الكليات والأقسام - الإدارة العليا</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#10B981', // Emerald 500
+                        dark: '#0F172A', // Slate 900
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        info: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .faculty-card-active {
+            background-color: #EEF2FF;
+            border-color: #4F46E5;
+        }
+        .faculty-card-active .icon-container {
+            background-color: #4F46E5;
+            color: white;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary rounded-full mix-blend-multiply filter blur-2xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+        
+        <div class="h-16 flex items-center justify-center border-b border-slate-800 relative z-10">
+            <div class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-shield-alt text-primary"></i>
+                <span>الإدارة العليا</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6 relative z-10">
+            <nav class="space-y-1 px-4">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 px-2">إدارة النظام</p>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors">
+                    <i class="fas fa-chart-line text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    نظرة عامة
+                </a>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-users-cog text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    المستخدمين والصلاحيات
+                </a>
+
+                <!-- Active Item -->
+                <a href="#" class="bg-primary/10 border border-primary/20 text-indigo-400 group flex items-center px-3 py-2.5 text-sm font-bold rounded-xl transition-colors shadow-sm mt-1">
+                    <i class="fas fa-university text-lg w-6 text-center ml-2"></i>
+                    الكليات والأقسام
+                </a>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-server text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    حالة الخوادم
+                </a>
+                
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 mt-6 px-2">الإعدادات</p>
+
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-cog text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    إعدادات المنظومة
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-800 flex items-center gap-3 relative z-10 bg-slate-900/50">
+            <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-white font-bold">
+                ع.م
+            </div>
+            <div>
+                <p class="text-sm font-bold text-white">عمر مصطفى</p>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_5px_#10B981]"></span>
+                    <p class="text-xs text-slate-400">مدير النظام (Super Admin)</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between shrink-0 shadow-sm z-10 gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">إدارة الكليات والأقسام</h1>
+                <p class="text-sm text-slate-500 mt-0.5">بناء الهيكل التنظيمي الأكاديمي للمؤسسة</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button class="px-4 py-2 bg-primary hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i class="fas fa-plus-circle"></i> إضافة كلية جديدة
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-hidden p-6">
+            <div class="max-w-7xl mx-auto flex flex-col lg:flex-row h-full gap-6">
+
+                <aside class="w-full lg:w-80 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col shrink-0 h-[400px] lg:h-full overflow-hidden">
+                    <!-- Search & Header -->
+                    <div class="p-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
+                        <div class="relative w-full">
+                            <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" placeholder="ابحث عن كلية..." class="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all shadow-sm">
+                        </div>
+                    </div>
+                    
+                    <!-- Faculty List -->
+                    <div class="flex-1 overflow-y-auto p-3 space-y-2">
+                        
+                        <!-- Faculty Item (Active) -->
+                        <div class="faculty-card-active border border-slate-200 rounded-xl p-3 cursor-pointer transition-all flex items-center gap-3">
+                            <div class="icon-container w-10 h-10 rounded-lg bg-indigo-50 text-primary flex items-center justify-center shrink-0 transition-colors">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-slate-800 text-sm">كلية علوم الحاسوب</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">4 أقسام علمية</p>
+                            </div>
+                            <i class="fas fa-chevron-left text-primary opacity-50"></i>
+                        </div>
+
+                        <!-- Faculty Item -->
+                        <div class="bg-white border border-slate-100 hover:border-slate-300 rounded-xl p-3 cursor-pointer transition-all flex items-center gap-3 group">
+                            <div class="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0 group-hover:bg-slate-100 transition-colors">
+                                <i class="fas fa-hard-hat"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-slate-700 text-sm group-hover:text-slate-900 transition-colors">كلية الهندسة</h3>
+                                <p class="text-xs text-slate-400 font-medium mt-0.5">6 أقسام علمية</p>
+                            </div>
+                        </div>
+
+                        <!-- Faculty Item -->
+                        <div class="bg-white border border-slate-100 hover:border-slate-300 rounded-xl p-3 cursor-pointer transition-all flex items-center gap-3 group">
+                            <div class="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0 group-hover:bg-slate-100 transition-colors">
+                                <i class="fas fa-stethoscope"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-slate-700 text-sm group-hover:text-slate-900 transition-colors">كلية الطب البشري</h3>
+                                <p class="text-xs text-slate-400 font-medium mt-0.5">8 أقسام علمية</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Faculty Item -->
+                        <div class="bg-white border border-slate-100 hover:border-slate-300 rounded-xl p-3 cursor-pointer transition-all flex items-center gap-3 group">
+                            <div class="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0 group-hover:bg-slate-100 transition-colors">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-slate-700 text-sm group-hover:text-slate-900 transition-colors">كلية الاقتصاد والعلوم</h3>
+                                <p class="text-xs text-slate-400 font-medium mt-0.5">3 أقسام علمية</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </aside>
+
+                <section class="flex-1 flex flex-col h-full overflow-hidden bg-white rounded-2xl shadow-sm border border-slate-200">
+                    
+                    <!-- Faculty Banner & Info -->
+                    <div class="border-b border-slate-100 bg-white shrink-0">
+                        <div class="p-6 pb-4">
+                            <div class="flex items-start justify-between mb-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-primary flex items-center justify-center text-3xl shadow-sm">
+                                        <i class="fas fa-laptop-code"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-2xl font-black text-slate-800">كلية علوم الحاسوب وتقنية المعلومات</h2>
+                                        <div class="flex items-center gap-3 mt-1.5 text-sm font-medium text-slate-500">
+                                            <span class="flex items-center gap-1"><i class="fas fa-fingerprint text-slate-400"></i> الرمز: CS-FAC</span>
+                                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                            <span class="flex items-center gap-1 text-secondary"><i class="fas fa-check-circle"></i> مفعلة</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="w-9 h-9 rounded-xl border border-slate-200 text-slate-500 hover:text-primary hover:bg-indigo-50 hover:border-indigo-200 transition-colors flex items-center justify-center" title="تعديل الكلية">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Dean / Details Row -->
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-6 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider w-16">عميد الكلية</p>
+                                    <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                                        <img src="https://ui-avatars.com/api/?name=Dr+Ahmed&background=EEF2FF&color=4F46E5" class="w-6 h-6 rounded-full" alt="Avatar">
+                                        <span class="text-sm font-bold text-slate-700">أ.د. أحمد عبدالمجيد</span>
+                                        <button class="ml-2 text-slate-400 hover:text-primary transition-colors"><i class="fas fa-sync-alt text-xs"></i></button>
+                                    </div>
+                                </div>
+                                <div class="hidden sm:block w-px h-8 bg-slate-200"></div>
+                                <div class="flex items-center gap-6">
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-400 uppercase">إجمالي الطلاب</p>
+                                        <p class="text-lg font-black text-slate-800">1,245</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-400 uppercase">الأساتذة</p>
+                                        <p class="text-lg font-black text-slate-800">48</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto bg-slate-50/30 p-6">
+                        
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                <i class="fas fa-sitemap text-slate-400"></i> الأقسام العلمية (4)
+                            </h3>
+                            <button class="px-3 py-1.5 bg-white border border-slate-200 text-primary rounded-lg text-sm font-bold hover:bg-indigo-50 transition-colors shadow-sm flex items-center gap-2">
+                                <i class="fas fa-plus"></i> إضافة قسم
+                            </button>
+                        </div>
+
+                        <!-- Departments Grid/List -->
+                        <div class="space-y-3">
+                            
+                            <!-- Department Card 1 -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start sm:items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-indigo-50 text-primary border border-indigo-100 flex items-center justify-center shrink-0">
+                                        <i class="fas fa-code"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-base">قسم هندسة البرمجيات</h4>
+                                        <p class="text-xs text-slate-500 font-medium mt-0.5">رئيس القسم: د. محمود عبدالله</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-6 sm:gap-8 bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 w-full sm:w-auto justify-between sm:justify-end">
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800">450</span>
+                                        <span class="block text-[10px] text-slate-400 font-bold uppercase">طالب</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800">24</span>
+                                        <span class="block text-[10px] text-slate-400 font-bold uppercase">مقرر</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 sm:ml-2">
+                                        <button class="w-8 h-8 rounded-md text-slate-400 hover:text-primary hover:bg-white border border-transparent hover:border-slate-200 transition-colors shadow-sm"><i class="fas fa-pen text-xs"></i></button>
+                                        <button class="w-8 h-8 rounded-md text-slate-400 hover:text-danger hover:bg-white border border-transparent hover:border-slate-200 transition-colors shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department Card 2 -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start sm:items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-emerald-50 text-secondary border border-emerald-100 flex items-center justify-center shrink-0">
+                                        <i class="fas fa-network-wired"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-base">قسم شبكات الحاسوب</h4>
+                                        <p class="text-xs text-slate-500 font-medium mt-0.5">رئيس القسم: د. سارة محمد</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-6 sm:gap-8 bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 w-full sm:w-auto justify-between sm:justify-end">
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800">320</span>
+                                        <span class="block text-[10px] text-slate-400 font-bold uppercase">طالب</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800">18</span>
+                                        <span class="block text-[10px] text-slate-400 font-bold uppercase">مقرر</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 sm:ml-2">
+                                        <button class="w-8 h-8 rounded-md text-slate-400 hover:text-primary hover:bg-white border border-transparent hover:border-slate-200 transition-colors shadow-sm"><i class="fas fa-pen text-xs"></i></button>
+                                        <button class="w-8 h-8 rounded-md text-slate-400 hover:text-danger hover:bg-white border border-transparent hover:border-slate-200 transition-colors shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department Card 3 -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start sm:items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-info border border-blue-100 flex items-center justify-center shrink-0">
+                                        <i class="fas fa-brain"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-base">قسم الذكاء الاصطناعي</h4>
+                                        <p class="text-xs text-slate-500 font-medium mt-0.5">رئيس القسم: أ.د. طارق حسن</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-6 sm:gap-8 bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 w-full sm:w-auto justify-between sm:justify-end">
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800">280</span>
+                                        <span class="block text-[10px] text-slate-400 font-bold uppercase">طالب</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800">15</span>
+                                        <span class="block text-[10px] text-slate-400 font-bold uppercase">مقرر</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 sm:ml-2">
+                                        <button class="w-8 h-8 rounded-md text-slate-400 hover:text-primary hover:bg-white border border-transparent hover:border-slate-200 transition-colors shadow-sm"><i class="fas fa-pen text-xs"></i></button>
+                                        <button class="w-8 h-8 rounded-md text-slate-400 hover:text-danger hover:bg-white border border-transparent hover:border-slate-200 transition-colors shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department Card 4 -->
+                            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start sm:items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-amber-50 text-warning border border-amber-100 flex items-center justify-center shrink-0">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-base">قسم نظم المعلومات</h4>
+                                        <p class="text-xs text-slate-500 font-medium mt-0.5">رئيس القسم: د. علي سالم</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-6 sm:gap-8 bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 w-full sm:w-auto justify-between sm:justify-end">
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800">195</span>
+                                        <span class="block text-[10px] text-slate-400 font-bold uppercase">طالب</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="block text-sm font-bold text-slate-800">12</span>
+                                        <span class="block text-[10px] text-slate-400 font-bold uppercase">مقرر</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 sm:ml-2">
+                                        <button class="w-8 h-8 rounded-md text-slate-400 hover:text-primary hover:bg-white border border-transparent hover:border-slate-200 transition-colors shadow-sm"><i class="fas fa-pen text-xs"></i></button>
+                                        <button class="w-8 h-8 rounded-md text-slate-400 hover:text-danger hover:bg-white border border-transparent hover:border-slate-200 transition-colors shadow-sm"><i class="fas fa-trash-alt text-xs"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

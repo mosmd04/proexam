@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة الامتحانات - إعدادات الامتحان (الخطوة 1)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo
+                        secondary: '#10B981', // Emerald
+                        dark: '#111827', // Gray 900
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F9FAFB; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Custom Toggle Switch styling */
+        .toggle-checkbox:checked { right: 0; border-color: #4F46E5; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #4F46E5; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800">
+            <div class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-graduation-cap text-primary"></i>
+                <span>بوابة المعلم</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6">
+            <nav class="space-y-2 px-4">
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2 px-2">القائمة الرئيسية</p>
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-home text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary"></i>
+                    الرئيسية
+                </a>
+                <a href="#" class="bg-primary text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors shadow-md shadow-indigo-900/50">
+                    <i class="fas fa-edit text-lg w-6 text-center ml-2"></i>
+                    إدارة الامتحانات
+                </a>
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-database text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary"></i>
+                    بنك الأسئلة
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">إنشاء امتحان جديد</h1>
+                <p class="text-sm text-gray-500 mt-0.5">قم بضبط إعدادات الامتحان قبل البدء بإضافة الأسئلة</p>
+            </div>
+            <button class="text-gray-500 hover:text-danger font-medium text-sm transition-colors flex items-center gap-2">
+                إلغاء الإنشاء <i class="fas fa-times"></i>
+            </button>
+        </header>
+
+        <!-- Stepper (شريط الخطوات) -->
+        <div class="bg-white border-b border-gray-100 px-6 py-4 shrink-0 shadow-sm z-0 relative">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center justify-between relative">
+                    <!-- خط الخلفية -->
+                    <div class="absolute top-1/2 right-0 left-0 h-1 bg-gray-100 -z-10 transform -translate-y-1/2 rounded-full"></div>
+                    <!-- خط التقدم الملون -->
+                    <div class="absolute top-1/2 right-0 w-0 h-1 bg-primary -z-10 transform -translate-y-1/2 rounded-full transition-all duration-500"></div>
+
+                    <!-- Step 1 (Active) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative">
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-lg font-bold shadow-md shadow-indigo-200 ring-4 ring-white">
+                            1
+                        </div>
+                        <span class="text-sm font-bold text-primary">الإعدادات الأساسية</span>
+                    </div>
+
+                    <!-- Step 2 (Pending) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative">
+                        <div class="w-10 h-10 rounded-full bg-gray-50 border-2 border-gray-200 text-gray-400 flex items-center justify-center text-lg font-bold ring-4 ring-white transition-colors">
+                            2
+                        </div>
+                        <span class="text-sm font-bold text-gray-400">بناء الأسئلة</span>
+                    </div>
+
+                    <!-- Step 3 (Pending) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative">
+                        <div class="w-10 h-10 rounded-full bg-gray-50 border-2 border-gray-200 text-gray-400 flex items-center justify-center text-lg font-bold ring-4 ring-white transition-colors">
+                            3
+                        </div>
+                        <span class="text-sm font-bold text-gray-400">المراجعة والنشر</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Content -->
+        <main class="flex-1 overflow-y-auto p-6 scroll-smooth">
+            <div class="max-w-3xl mx-auto space-y-6 pb-24">
+                
+                <!-- Section 1: المعلومات الأساسية -->
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-primary"></i> المعلومات الأساسية
+                    </h2>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">عنوان الامتحان <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="مثال: امتحان منتصف الفصل (Midterm)" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">المقرر الدراسي <span class="text-danger">*</span></label>
+                            <select class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors">
+                                <option value="" disabled selected>اختر المقرر...</option>
+                                <option>هياكل البيانات والخوارزميات (CS301)</option>
+                                <option>هندسة البرمجيات المتقدمة (SE405)</option>
+                                <option>أساسيات قواعد البيانات (DB201)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">وصف أو تعليمات للطلاب (اختياري)</label>
+                            <textarea rows="3" placeholder="اكتب أي تعليمات تظهر للطالب قبل بدء الامتحان..." class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-y"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2: التوقيت والمدة -->
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+                        <i class="far fa-clock text-primary"></i> التوقيت والمدة
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">تاريخ الامتحان</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400"><i class="far fa-calendar-alt"></i></div>
+                                <input type="date" class="w-full pr-11 pl-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">وقت البدء</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400"><i class="far fa-clock"></i></div>
+                                <input type="time" class="w-full pr-11 pl-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">مدة الامتحان (بالدقائق)</label>
+                            <div class="relative max-w-xs">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400"><i class="fas fa-hourglass-half"></i></div>
+                                <input type="number" min="5" value="60" class="w-full pr-11 pl-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors font-bold text-lg" dir="ltr">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">سيتم إغلاق الامتحان تلقائياً بعد انتهاء هذه المدة.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: سياسات الامتحان (Toggles) -->
+                <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+                        <i class="fas fa-sliders-h text-primary"></i> سياسات وإعدادات متقدمة
+                    </h2>
+                    
+                    <div class="space-y-4 divide-y divide-gray-50">
+                        
+                        <!-- Toggle Item 1 -->
+                        <div class="flex items-center justify-between py-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-800">ترتيب عشوائي للأسئلة</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">تغيير ترتيب ظهور الأسئلة لكل طالب لمنع الغش.</p>
+                            </div>
+                            <!-- Tailwind CSS modern toggle -->
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary rtl:peer-checked:after:-translate-x-full"></div>
+                            </label>
+                        </div>
+
+                        <!-- Toggle Item 2 -->
+                        <div class="flex items-center justify-between py-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-800">إظهار النتيجة فوراً</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">يسمح للطالب برؤية درجته بمجرد الضغط على زر التسليم.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary rtl:peer-checked:after:-translate-x-full"></div>
+                            </label>
+                        </div>
+
+                        <!-- Toggle Item 3 -->
+                        <div class="flex items-center justify-between py-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                    الوضع الآمن الصارم <span class="bg-red-100 text-danger text-[10px] px-2 py-0.5 rounded uppercase">Anti-Cheat</span>
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-0.5">منع الطالب من مغادرة نافذة الامتحان (Kiosk Mode).</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-danger rtl:peer-checked:after:-translate-x-full"></div>
+                            </label>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Sticky Footer for Actions -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:pl-6 md:pr-72 z-10 transition-all">
+            <button class="px-6 py-2.5 text-gray-600 font-bold text-sm hover:bg-gray-100 rounded-xl transition-colors">
+                حفظ كمسودة
+            </button>
+            <button class="px-8 py-2.5 bg-primary hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-colors flex items-center gap-2">
+                التالي: إضافة الأسئلة <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
+
+    </div>
+
+</body>
+</html>

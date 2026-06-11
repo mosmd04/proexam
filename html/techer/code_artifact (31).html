@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التصحيح اليدوي - بوابة المعلم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo
+                        secondary: '#10B981', // Emerald
+                        dark: '#111827', // Gray 900
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        success: '#10B981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* تأثيرات تحديد الطالب في القائمة */
+        .student-item.active {
+            border-right: 4px solid #4F46E5;
+            background-color: #EEF2FF;
+        }
+        .student-item {
+            border-right: 4px solid transparent;
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100">
+
+    <!-- القائمة الجانبية الشاملة -->
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800 shrink-0">
+            <div class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-graduation-cap text-primary"></i>
+                <span>بوابة المعلم</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6">
+            <nav class="space-y-1.5 px-4">
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3 px-2">القائمة الرئيسية</p>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-home text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    الرئيسية
+                </a>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-edit text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    إدارة الامتحانات
+                </a>
+
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-database text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    بنك الأسئلة
+                </a>
+
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-video text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    المراقبة الحية
+                </a>
+                
+                <!-- العنصر النشط: الطلاب والنتائج (التصحيح يندرج تحته) -->
+                <a href="#" class="bg-primary text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors shadow-md shadow-indigo-900/50">
+                    <i class="fas fa-users text-lg w-6 text-center ml-2"></i>
+                    الطلاب والنتائج
+                </a>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-chart-pie text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    التقارير والإحصائيات
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 flex items-center gap-3 shrink-0 hover:bg-gray-800 cursor-pointer transition-colors">
+            <div class="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center text-white font-bold relative">
+                د.م
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-dark rounded-full"></span>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-bold text-white truncate">د. محمود عبدالله</p>
+                <p class="text-xs text-gray-400 truncate">أستاذ مشارك - علوم الحاسب</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0 shadow-sm z-10">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="bg-indigo-50 text-primary px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-100">التصحيح اليدوي</span>
+                    <h1 class="text-xl font-bold text-gray-800">هياكل البيانات (CS301)</h1>
+                </div>
+                <p class="text-sm text-gray-500">امتحان منتصف الفصل - إجابات الأسئلة المقالية</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Dropdown لاختيار السؤال -->
+                <div class="relative">
+                    <select class="appearance-none bg-white border border-gray-300 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer shadow-sm">
+                        <option>السؤال 3: اشرح الفرق بين Stack و Queue</option>
+                        <option>السؤال 7: متى نستخدم الأشجار بدلاً من المصفوفات؟</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- مساحة العمل الرئيسية -->
+        <main class="flex-1 overflow-hidden flex flex-col lg:flex-row scroll-smooth">
+            
+            <!-- العمود الأيمن: قائمة الطلاب -->
+            <aside class="w-full lg:w-80 bg-white border-l border-gray-200 flex flex-col shrink-0 h-1/3 lg:h-full z-0 shadow-[4px_0_10px_rgba(0,0,0,0.02)]">
+                
+                <!-- إحصائيات سريعة للتقدم -->
+                <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-bold text-gray-700">تقدم التصحيح</span>
+                        <span class="text-sm font-bold text-primary" dir="ltr">12 / 45</span>
+                    </div>
+                    <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-primary h-full rounded-full transition-all" style="width: 26%"></div>
+                    </div>
+                    
+                    <!-- فلاتر سريعة -->
+                    <div class="flex gap-2 mt-4">
+                        <button class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-xs font-bold text-gray-600 hover:bg-gray-50 shadow-sm">الكل</button>
+                        <button class="flex-1 py-1.5 bg-yellow-50 border border-yellow-200 rounded text-xs font-bold text-warning hover:bg-yellow-100 shadow-sm relative">
+                            بانتظار التقييم
+                            <span class="absolute -top-1.5 -right-1.5 bg-warning text-white w-4 h-4 rounded-full flex items-center justify-center text-[9px]">33</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- قائمة الطلاب الممررة -->
+                <div class="flex-1 overflow-y-auto">
+                    
+                    <!-- طالب 1 (تم التصحيح) -->
+                    <div class="student-item p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 bg-white">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">أ.م</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-800">أحمد محمود عبدالله</h4>
+                                    <p class="text-[10px] text-gray-500">2024001</p>
+                                </div>
+                            </div>
+                            <!-- علامة تم التصحيح -->
+                            <span class="bg-green-100 text-success px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                <i class="fas fa-check"></i> 8/10
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- طالب 2 (النشط - قيد التصحيح) -->
+                    <div class="student-item active p-4 border-b border-indigo-100 cursor-pointer">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-indigo-200 text-primary flex items-center justify-center text-xs font-bold">س.ع</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-primary">سارة علي محمد</h4>
+                                    <p class="text-[10px] text-indigo-400">2024002</p>
+                                </div>
+                            </div>
+                            <!-- علامة بانتظار التصحيح -->
+                            <span class="bg-yellow-100 text-warning px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                <i class="fas fa-circle text-[6px]"></i> بانتظار
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2 line-clamp-1">المكدس يعمل بمبدأ أن العنصر الأخير الذي...</p>
+                    </div>
+
+                    <!-- طالب 3 (بانتظار التصحيح) -->
+                    <div class="student-item p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 bg-white">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">خ.ي</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-800">خالد يوسف إبراهيم</h4>
+                                    <p class="text-[10px] text-gray-500">2024003</p>
+                                </div>
+                            </div>
+                            <span class="bg-yellow-100 text-warning px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                <i class="fas fa-circle text-[6px]"></i> بانتظار
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- طالب 4 (بانتظار التصحيح) -->
+                    <div class="student-item p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 bg-white">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">م.ح</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-800">مريم حسن مصطفى</h4>
+                                    <p class="text-[10px] text-gray-500">2024005</p>
+                                </div>
+                            </div>
+                            <span class="bg-yellow-100 text-warning px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                <i class="fas fa-circle text-[6px]"></i> بانتظار
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </aside>
+
+            <!-- العمود الأيسر: منطقة التقييم (Workspace) -->
+            <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
+                
+                <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-24">
+                    
+                    <!-- كارت نص السؤال والإجابة النموذجية -->
+                    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="bg-gray-50 p-4 border-b border-gray-200">
+                            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">السؤال المقالي</h3>
+                            <p class="text-gray-800 font-bold text-lg leading-relaxed">
+                                اشرح باختصار الفرق الأساسي بين المكدس (Stack) والطابور (Queue) من حيث آلية إدخال وإخراج البيانات، مع ذكر مثال تطبيقي لكل منهما.
+                            </p>
+                        </div>
+                        
+                        <!-- الإجابة النموذجية (مخفية بشكل افتراضي وتفتح عند الحاجة) -->
+                        <details class="group">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 text-sm text-primary bg-indigo-50/50 hover:bg-indigo-50 transition-colors">
+                                <span class="flex items-center gap-2"><i class="fas fa-lightbulb text-yellow-500"></i> عرض الإجابة النموذجية (للمرجعية)</span>
+                                <span class="transition group-open:rotate-180">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </summary>
+                            <div class="text-gray-600 p-4 text-sm leading-relaxed border-t border-indigo-100 bg-white">
+                                <strong>المكدس (Stack):</strong> يعمل بمبدأ LIFO (الأخير دخولاً، الأول خروجاً). مثال: زر التراجع (Undo) في محررات النصوص.<br><br>
+                                <strong>الطابور (Queue):</strong> يعمل بمبدأ FIFO (الأول دخولاً، الأول خروجاً). مثال: طابور الطباعة (Print Spooler) في الطابعات.
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- كارت إجابة الطالب الحالية -->
+                    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 relative">
+                        <!-- ترويسة الطالب -->
+                        <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 text-primary flex items-center justify-center text-lg font-bold shadow-sm border border-indigo-200">س.ع</div>
+                                <div>
+                                    <h4 class="text-base font-bold text-gray-800">إجابة الطالبة: سارة علي محمد</h4>
+                                    <p class="text-xs text-gray-500 flex items-center gap-2">
+                                        <i class="far fa-clock"></i> تم التسليم الساعة 10:15 صباحاً
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold border border-gray-200">
+                                42 كلمة
+                            </span>
+                        </div>
+                        
+                        <!-- نص إجابة الطالب (يشبه الورقة) -->
+                        <div class="bg-blue-50/30 border border-blue-100 p-5 rounded-xl text-gray-800 font-medium text-lg leading-loose min-h-[150px]">
+                            المكدس يعمل بمبدأ أن العنصر الأخير الذي يتم إضافته هو أول عنصر يتم حذفه (LIFO)، مثل قائمة التصفح في المتصفح للعودة للخلف. 
+                            أما الطابور فيعمل بمبدأ الأول دخولاً هو الأول خروجاً (FIFO)، مثل الوقوف في طابور لشراء تذكرة.
+                        </div>
+                    </div>
+
+                    <!-- لوحة التحكم بالتقييم (Grading Panel) -->
+                    <div class="bg-white border border-gray-200 rounded-2xl shadow-lg shadow-indigo-100/50 p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                            
+                            <!-- إدخال الدرجة -->
+                            <div class="md:col-span-1 bg-gray-50 p-5 rounded-xl border border-gray-200 text-center flex flex-col justify-center h-full">
+                                <label class="block text-sm font-bold text-gray-600 mb-3">الدرجة المستحقة</label>
+                                <div class="flex items-center justify-center text-4xl font-black text-gray-800 dir-ltr">
+                                    <input type="number" max="10" min="0" step="0.5" class="w-24 bg-white border-2 border-primary rounded-lg text-center focus:outline-none focus:ring-4 focus:ring-indigo-100 text-primary py-2 shadow-sm" autofocus placeholder="-" dir="ltr">
+                                    <span class="text-gray-400 mx-2 text-3xl">/</span>
+                                    <span class="text-gray-500 text-3xl">10</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-4">يمكنك إدخال أنصاف الدرجات (مثال: 8.5)</p>
+                            </div>
+
+                            <!-- التعليق والملاحظات (Feedback) -->
+                            <div class="md:col-span-2">
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="block text-sm font-bold text-gray-700">ملاحظات للطالب (اختياري)</label>
+                                </div>
+                                <textarea rows="3" placeholder="اكتب ملاحظاتك هنا لتظهر للطالب عند إعلان النتيجة..." class="w-full bg-white border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary shadow-sm resize-y"></textarea>
+                                
+                                <!-- أزرار التعليقات السريعة (SaaS Feature) -->
+                                <div class="mt-3">
+                                    <p class="text-xs font-bold text-gray-400 mb-2">تعليقات جاهزة (انقر للإضافة):</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button class="px-3 py-1 bg-green-50 border border-green-200 text-success hover:bg-green-100 rounded-full text-xs font-bold transition-colors">إجابة نموذجية وممتازة 👏</button>
+                                        <button class="px-3 py-1 bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 rounded-full text-xs font-bold transition-colors">إجابة صحيحة ولكن ينقصها التفصيل</button>
+                                        <button class="px-3 py-1 bg-yellow-50 border border-yellow-200 text-warning hover:bg-yellow-100 rounded-full text-xs font-bold transition-colors">يرجى مراجعة المثال التطبيقي</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Sticky Footer for Actions -->
+                <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] z-20">
+                    <button class="px-5 py-2.5 text-gray-600 font-bold text-sm hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-2 border border-gray-200 bg-white">
+                        <i class="fas fa-arrow-right"></i> طالب سابق
+                    </button>
+                    
+                    <div class="flex items-center gap-3">
+                        <button class="px-8 py-2.5 bg-primary hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-colors flex items-center gap-2">
+                            حفظ والانتقال للتالي <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

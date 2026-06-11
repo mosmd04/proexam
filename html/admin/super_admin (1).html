@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإدارة العليا - منظومة الامتحانات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#10B981', // Emerald 500
+                        dark: '#0F172A', // Slate 900 (Slightly different dark for Admin)
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        info: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .table-row-hover:hover td { background-color: #F1F5F9; transition: background-color 0.2s ease; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0 relative overflow-hidden">
+        <!-- Decorative Background Elements -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary rounded-full mix-blend-multiply filter blur-2xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+        
+        <div class="h-16 flex items-center justify-center border-b border-slate-800 relative z-10">
+            <div class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-shield-alt text-primary"></i>
+                <span>الإدارة العليا</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6 relative z-10">
+            <nav class="space-y-1 px-4">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 px-2">إدارة النظام</p>
+                
+                <!-- Active Item -->
+                <a href="#" class="bg-primary/10 border border-primary/20 text-indigo-400 group flex items-center px-3 py-2.5 text-sm font-bold rounded-xl transition-colors shadow-sm">
+                    <i class="fas fa-chart-line text-lg w-6 text-center ml-2"></i>
+                    نظرة عامة
+                </a>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-users-cog text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    المستخدمين والصلاحيات
+                </a>
+
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-university text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    الكليات والأقسام
+                </a>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-server text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    حالة الخوادم
+                </a>
+                
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 mt-6 px-2">الإعدادات</p>
+
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-cog text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    إعدادات المنظومة
+                </a>
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-history text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    سجل العمليات (Audit)
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-800 flex items-center gap-3 relative z-10 bg-slate-900/50">
+            <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-white font-bold">
+                ع.م
+            </div>
+            <div>
+                <p class="text-sm font-bold text-white">عمر مصطفى</p>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_5px_#10B981]"></span>
+                    <p class="text-xs text-slate-400">مدير النظام (Super Admin)</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between shrink-0 shadow-sm z-10 gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">لوحة التحكم المركزية</h1>
+                <p class="text-sm text-slate-500 mt-0.5">مراقبة أداء النظام وإدارة المستخدمين</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="relative hidden lg:block">
+                    <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" placeholder="ابحث عن طالب، معلم، أو مادة..." class="w-64 pl-4 pr-10 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-slate-50">
+                </div>
+                
+                <button class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap">
+                    <i class="fas fa-file-import text-primary"></i>
+                    استيراد Excel
+                </button>
+                <button class="px-4 py-2 bg-primary hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i class="fas fa-user-plus"></i>
+                    مستخدم جديد
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6">
+            <div class="max-w-7xl mx-auto space-y-6">
+
+                <!-- System KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <!-- KPI 1: Users -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-indigo-100 transition-colors">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-primary flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-xs font-bold mb-1">إجمالي المستخدمين النشطين</p>
+                            <div class="flex items-baseline gap-2">
+                                <p class="text-2xl font-black text-slate-800" dir="ltr">12,450</p>
+                                <span class="text-xs font-bold text-secondary bg-green-50 px-1.5 py-0.5 rounded"><i class="fas fa-arrow-up mr-0.5"></i> 12%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 2: Active Exams -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-emerald-100 transition-colors">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-secondary flex items-center justify-center text-2xl shrink-0 relative group-hover:scale-110 transition-transform">
+                            <i class="fas fa-satellite-dish"></i>
+                            <span class="absolute top-0 right-0 w-3 h-3 bg-secondary rounded-full border-2 border-white animate-pulse"></span>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-xs font-bold mb-1">امتحانات تجرى الآن</p>
+                            <div class="flex items-baseline gap-2">
+                                <p class="text-2xl font-black text-slate-800" dir="ltr">48</p>
+                                <span class="text-xs font-medium text-slate-400">في 8 كليات</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Server Health -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-blue-100 transition-colors">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-50 text-info flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="w-full">
+                            <div class="flex justify-between items-end mb-1.5">
+                                <p class="text-slate-500 text-xs font-bold">استهلاك الموارد (CPU)</p>
+                                <p class="text-sm font-black text-slate-800" dir="ltr">34%</p>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-info h-full rounded-full" style="width: 34%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 4: Security Alerts -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-amber-100 transition-colors relative overflow-hidden">
+                        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-50 rounded-full opacity-50 pointer-events-none"></div>
+                        <div class="w-14 h-14 rounded-2xl bg-amber-50 text-warning flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform z-10">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="z-10">
+                            <p class="text-slate-500 text-xs font-bold mb-1">تنبيهات أمنية / غش</p>
+                            <div class="flex items-baseline gap-2">
+                                <p class="text-2xl font-black text-slate-800" dir="ltr">15</p>
+                                <span class="text-xs font-medium text-warning">تتطلب المراجعة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    
+                    <!-- Left/Main Area: User Management Table -->
+                    <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                        <div class="px-6 py-5 border-b border-slate-100 bg-white flex items-center justify-between">
+                            <h2 class="font-bold text-lg text-slate-800">أحدث المستخدمين المسجلين</h2>
+                            <button class="text-sm font-bold text-primary hover:underline flex items-center gap-1">
+                                إدارة الجميع <i class="fas fa-arrow-left text-xs"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-right">
+                                <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase font-bold tracking-wider">
+                                    <tr>
+                                        <th class="p-4">المستخدم</th>
+                                        <th class="p-4">الدور</th>
+                                        <th class="p-4">الكلية/القسم</th>
+                                        <th class="p-4">الحالة</th>
+                                        <th class="p-4 text-center">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                                    
+                                    <!-- User Row 1 (Teacher) -->
+                                    <tr class="table-row-hover bg-white">
+                                        <td class="p-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="relative">
+                                                    <div class="w-9 h-9 rounded-full bg-indigo-100 text-primary flex items-center justify-center font-bold text-sm">م</div>
+                                                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary border-2 border-white rounded-full"></span>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-slate-800">د. محمود عبدالله</p>
+                                                    <p class="text-xs text-slate-500 font-normal">m.abdullah@univ.edu</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="p-4">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-indigo-50 text-primary text-xs font-bold border border-indigo-100">
+                                                <i class="fas fa-chalkboard-teacher"></i> أستاذ
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-slate-600 text-xs">كلية الحاسبات<br><span class="text-slate-400">هندسة البرمجيات</span></td>
+                                        <td class="p-4">
+                                            <span class="inline-flex items-center gap-1 text-secondary text-xs font-bold">
+                                                <i class="fas fa-circle text-[8px]"></i> نشط
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-center">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-indigo-50 transition-colors flex items-center justify-center"><i class="fas fa-pen"></i></button>
+                                                <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-danger hover:bg-red-50 transition-colors flex items-center justify-center"><i class="fas fa-ban"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- User Row 2 (Student) -->
+                                    <tr class="table-row-hover bg-white">
+                                        <td class="p-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="relative">
+                                                    <img src="https://ui-avatars.com/api/?name=Ahmed+Mahmoud&background=F1F5F9&color=475569" class="w-9 h-9 rounded-full border border-slate-200" alt="Avatar">
+                                                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary border-2 border-white rounded-full"></span>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-slate-800">أحمد محمود خليل</p>
+                                                    <p class="text-xs text-slate-500 font-normal">ID: 20240015</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="p-4">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-secondary text-xs font-bold border border-emerald-100">
+                                                <i class="fas fa-user-graduate"></i> طالب
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-slate-600 text-xs">كلية الحاسبات<br><span class="text-slate-400">تقنية المعلومات</span></td>
+                                        <td class="p-4">
+                                            <span class="inline-flex items-center gap-1 text-secondary text-xs font-bold">
+                                                <i class="fas fa-circle text-[8px]"></i> نشط
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-center">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-indigo-50 transition-colors flex items-center justify-center"><i class="fas fa-pen"></i></button>
+                                                <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-danger hover:bg-red-50 transition-colors flex items-center justify-center"><i class="fas fa-ban"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- User Row 3 (Inactive Student) -->
+                                    <tr class="table-row-hover bg-white opacity-75">
+                                        <td class="p-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="relative">
+                                                    <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-sm">س</div>
+                                                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-slate-300 border-2 border-white rounded-full"></span>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-slate-600">سارة علي محمد</p>
+                                                    <p class="text-xs text-slate-400 font-normal">ID: 20240088</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="p-4">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-secondary text-xs font-bold border border-emerald-100">
+                                                <i class="fas fa-user-graduate"></i> طالب
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-slate-500 text-xs">كلية الهندسة<br><span class="text-slate-400">هندسة مدنية</span></td>
+                                        <td class="p-4">
+                                            <span class="inline-flex items-center gap-1 text-slate-400 text-xs font-bold">
+                                                <i class="fas fa-circle text-[8px]"></i> غير متصل
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-center">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-indigo-50 transition-colors flex items-center justify-center"><i class="fas fa-pen"></i></button>
+                                                <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-danger hover:bg-red-50 transition-colors flex items-center justify-center"><i class="fas fa-ban"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right Area: System Audit Log -->
+                    <aside class="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col overflow-hidden h-[400px] xl:h-auto">
+                        <div class="p-5 border-b border-slate-100 bg-white flex items-center justify-between z-10">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fas fa-history text-slate-400"></i>
+                                سجل نشاط النظام
+                            </h3>
+                        </div>
+                        
+                        <div class="flex-1 overflow-y-auto p-5 relative">
+                            <!-- Timeline line -->
+                            <div class="absolute right-9 top-5 bottom-5 w-0.5 bg-slate-100"></div>
+                            
+                            <div class="space-y-6 relative z-10">
+                                
+                                <!-- Log Item 1: Success -->
+                                <div class="flex gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-green-50 border-2 border-white flex items-center justify-center text-secondary shrink-0 z-10 mt-0.5 shadow-sm">
+                                        <i class="fas fa-file-excel text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-800">استيراد طلاب جدد</p>
+                                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">قام المشرف <span class="font-bold text-primary">عمر مصطفى</span> باستيراد 120 طالباً لكلية الطب.</p>
+                                        <p class="text-[10px] text-slate-400 font-bold mt-1.5" dir="ltr">10 mins ago</p>
+                                    </div>
+                                </div>
+
+                                <!-- Log Item 2: Warning/Action -->
+                                <div class="flex gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-primary shrink-0 z-10 mt-0.5 shadow-sm">
+                                        <i class="fas fa-edit text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-800">نشر امتحان جديد</p>
+                                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed"><span class="font-bold text-slate-700">د. محمود عبدالله</span> قام بنشر امتحان "هياكل البيانات".</p>
+                                        <p class="text-[10px] text-slate-400 font-bold mt-1.5" dir="ltr">45 mins ago</p>
+                                    </div>
+                                </div>
+
+                                <!-- Log Item 3: Alert -->
+                                <div class="flex gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-red-50 border-2 border-white flex items-center justify-center text-danger shrink-0 z-10 mt-0.5 shadow-sm">
+                                        <i class="fas fa-exclamation-triangle text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-800">محاولة دخول فاشلة</p>
+                                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">تعددت محاولات الدخول الخاطئة للحساب (ID: 20240099).</p>
+                                        <p class="text-[10px] text-slate-400 font-bold mt-1.5" dir="ltr">2 hours ago</p>
+                                    </div>
+                                </div>
+
+                                <!-- Log Item 4: System -->
+                                <div class="flex gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-slate-500 shrink-0 z-10 mt-0.5 shadow-sm">
+                                        <i class="fas fa-sync text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-800">تحديث النظام آلياً</p>
+                                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">تم أخذ نسخة احتياطية (Backup) لقاعدة البيانات بنجاح.</p>
+                                        <p class="text-[10px] text-slate-400 font-bold mt-1.5" dir="ltr">Yesterday</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 border-t border-slate-100 bg-slate-50">
+                            <button class="w-full text-center text-sm font-bold text-primary hover:underline">عرض السجل الكامل</button>
+                        </div>
+                    </aside>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

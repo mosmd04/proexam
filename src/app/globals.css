@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-cairo), sans-serif;
+  
+  --color-primary: #4F46E5; /* Indigo 600 */
+  --color-secondary: #10B981; /* Emerald 500 */
+  --color-dark: #0F172A; /* Slate 900 */
+  --color-danger: #EF4444; /* Red 500 */
+  --color-warning: #F59E0B; /* Amber 500 */
+  --color-info: #3B82F6; /* Blue 500 */
+  --color-success: #10B981; /* Emerald 500 */
+}
+
+:root {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-cairo), sans-serif;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Row hover transition */
+.table-row-hover:hover td {
+  background-color: #F1F5F9;
+  transition: background-color 0.2s ease;
+}
+
+/* Glassmorphism card for student banner */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Calendar Grid Custom Classes */
+.calendar-cell {
+  transition: all 0.2s ease;
+}
+.calendar-cell:hover:not(.empty) {
+  background-color: #F1F5F9;
+  cursor: pointer;
+}
+.calendar-cell.active {
+  background-color: #EEF2FF;
+  border-color: #4F46E5;
+  box-shadow: inset 0 0 0 1px #4F46E5;
+}
+.calendar-cell.today {
+  background-color: #FEF2F2;
+  border-color: #EF4444;
+}
+
+/* Settings Tabs Active State Class */
+.settings-tab-active {
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  border-right: 3px solid #4F46E5;
+  font-weight: 700;
+}
+.settings-tab-active i {
+  color: #4F46E5;
+}

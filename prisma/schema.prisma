@@ -1,0 +1,551 @@
+// ============================================================================
+// ProExam - Enterprise SaaS Examination System
+// Prisma Schema - Production-Ready Database Architecture
+// ============================================================================
+// Key Design Decisions:
+//   • UUIDs for all primary keys (security + distributed-ready)
+//   • Explicit RBAC with Role -> RolePermission -> Permission (no enum shortcuts)
+//   • Institution hierarchy: University -> Faculty -> Department -> Course
+//   • QuestionBank (mutable) vs ExamQuestion (immutable snapshot) separation
+//   • ProctoringLog for anti-cheat telemetry
+//   • Composite unique constraints & explicit indexes on all FK paths
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  ESSAY
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  FORCE_SUBMITTED_BY_SYSTEM
+  FORCE_SUBMITTED_BY_TEACHER
+  GRADED
+}
+
+enum ViolationType {
+  TAB_SWITCH
+  BLUR
+  DEVICE_CHANGED
+  MULTIPLE_IP_DETECTED
+  COPY_PASTE_DETECTED
+  SCREEN_CAPTURE_DETECTED
+  BROWSER_DEV_TOOLS_OPENED
+  FULLSCREEN_EXIT
+  WEBCAM_FACE_NOT_DETECTED
+  WEBCAM_MULTIPLE_FACES
+  UNKNOWN
+}
+
+enum SeverityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+  CANCELLED
+}
+
+// ============================================================================
+// RBAC: USERS, ROLES, PERMISSIONS
+// ============================================================================
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @db.VarChar(255)
+  email        String    @unique @db.VarChar(320)
+  passwordHash String    @db.Text
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  userRoles         UserRole[]
+  institutionUsers  InstitutionUser[]
+  courseEnrollments CourseEnrollment[]
+  createdExams      Exam[]            @relation("ExamCreator")
+  examAttempts      ExamAttempt[]
+  gradedAttempts    ExamAttempt[]     @relation("GradedBy")
+  createdQuestions  Question[]
+
+  @@index([email])
+  @@index([isActive])
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@index([name])
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  /// Machine-readable permission key, e.g. "exam:create", "question:delete"
+  key         String   @unique @db.VarChar(150)
+  /// Human-readable label
+  displayName String   @db.VarChar(255)
+  description String?  @db.Text
+  /// Logical grouping for UI display, e.g. "exam", "question_bank", "users"
+  module      String   @db.VarChar(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  rolePermissions RolePermission[]
+
+  @@index([module])
+  @@index([key])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String   @id @default(uuid()) @db.Uuid
+  roleId       String   @db.Uuid
+  permissionId String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  roleId    String   @db.Uuid
+  /// Optional scoping: restrict role to a specific institution context
+  scopeType String?  @db.VarChar(50)
+  scopeId   String?  @db.Uuid
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId, scopeType, scopeId])
+  @@index([userId])
+  @@index([roleId])
+  @@index([scopeId])
+  @@map("user_roles")
+}
+
+// ============================================================================
+// INSTITUTION HIERARCHY: University -> Faculty -> Department -> Course
+// ============================================================================
+
+model University {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  code      String   @unique @db.VarChar(50)
+  logoUrl   String?  @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  faculties        Faculty[]
+  institutionUsers InstitutionUser[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("universities")
+}
+
+model Faculty {
+  id           String   @id @default(uuid()) @db.Uuid
+  universityId String   @db.Uuid
+  name         String   @db.VarChar(255)
+  code         String   @db.VarChar(50)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  university  University   @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  departments Department[]
+
+  @@unique([universityId, code])
+  @@index([universityId])
+  @@index([code])
+  @@map("faculties")
+}
+
+model Department {
+  id        String   @id @default(uuid()) @db.Uuid
+  facultyId String   @db.Uuid
+  name      String   @db.VarChar(255)
+  code      String   @db.VarChar(50)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  faculty Faculty  @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  courses Course[]
+
+  @@unique([facultyId, code])
+  @@index([facultyId])
+  @@index([code])
+  @@map("departments")
+}
+
+model Course {
+  id           String   @id @default(uuid()) @db.Uuid
+  departmentId String   @db.Uuid
+  name         String   @db.VarChar(255)
+  code         String   @db.VarChar(50)
+  creditHours  Int      @default(3)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  department  Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  exams       Exam[]
+  enrollments CourseEnrollment[]
+
+  @@unique([departmentId, code])
+  @@index([departmentId])
+  @@index([code])
+  @@map("courses")
+}
+
+/// Explicit link between Users (Teachers/Students) and Courses
+model CourseEnrollment {
+  id        String   @id @default(uuid()) @db.Uuid
+  courseId  String   @db.Uuid
+  userId    String   @db.Uuid
+  /// Role in the context of this course: "TEACHER" or "STUDENT"
+  role      String   @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, userId])
+  @@index([courseId])
+  @@index([userId])
+  @@map("course_enrollments")
+}
+
+/// Links users to universities with contextual membership
+model InstitutionUser {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  universityId String   @db.Uuid
+  studentId    String?  @db.VarChar(50)
+  employeeId   String?  @db.VarChar(50)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, universityId])
+  @@index([userId])
+  @@index([universityId])
+  @@index([studentId])
+  @@map("institution_users")
+}
+
+// ============================================================================
+// QUESTION BANK (MUTABLE - Source of Truth for authoring)
+// ============================================================================
+
+model Question {
+  id             String       @id @default(uuid()) @db.Uuid
+  courseId       String       @db.Uuid
+  createdById    String       @db.Uuid
+  questionType   QuestionType
+  /// The question prompt / stem
+  text           String       @db.Text
+  /// For MCQ: JSON array of { label: string, text: string, isCorrect: boolean }
+  /// For TRUE_FALSE: JSON { correctAnswer: boolean }
+  /// For ESSAY: JSON { rubric: string, maxWords?: number } or null
+  choicesPayload Json?
+  /// Correct answer explanation (shown after grading)
+  explanation    String?      @db.Text
+  /// Difficulty from 1 (easy) to 5 (hard)
+  difficulty     Int          @default(3)
+  /// Points this question is worth when used in an exam
+  defaultPoints  Float        @default(1.0)
+  tags           String[]     @default([])
+  isActive       Boolean      @default(true)
+  version        Int          @default(1)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Relations
+  course        Course         @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  createdBy     User           @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  examQuestions ExamQuestion[] @relation("SourceQuestion")
+
+  @@index([courseId])
+  @@index([createdById])
+  @@index([questionType])
+  @@index([difficulty])
+  @@index([isActive])
+  @@map("questions")
+}
+
+// ============================================================================
+// EXAM DEFINITION & IMMUTABLE QUESTION SNAPSHOTS
+// ============================================================================
+
+model Exam {
+  id               String     @id @default(uuid()) @db.Uuid
+  courseId         String     @db.Uuid
+  createdById      String     @db.Uuid
+  title            String     @db.VarChar(500)
+  description      String?    @db.Text
+  instructions     String?    @db.Text
+  status           ExamStatus @default(DRAFT)
+  /// Duration in minutes
+  durationMinutes  Int
+  /// Total points (auto-calculated or manually overridden)
+  totalPoints      Float      @default(0)
+  /// Max allowed attempts per student (1 = single attempt)
+  maxAttempts      Int        @default(1)
+  /// When the exam window opens for students
+  scheduledStart   DateTime?
+  /// When the exam window closes — no new attempts after this
+  scheduledEnd     DateTime?
+  /// Randomize question order per student
+  shuffleQuestions Boolean    @default(false)
+  /// Randomize choices within MCQ questions
+  shuffleChoices   Boolean    @default(false)
+  /// Enable proctoring features
+  enableProctoring Boolean    @default(true)
+  /// Passing score percentage (0-100)
+  passingScore     Float?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  // Relations
+  course        Course         @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  createdBy     User           @relation("ExamCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  examQuestions ExamQuestion[]
+  examAttempts  ExamAttempt[]
+
+  @@index([courseId])
+  @@index([createdById])
+  @@index([status])
+  @@index([scheduledStart])
+  @@index([scheduledEnd])
+  @@map("exams")
+}
+
+/// Immutable snapshot of a question as it appeared when the exam was created.
+/// Changes to the QuestionBank after snapshot creation do NOT affect this record.
+model ExamQuestion {
+  id               String       @id @default(uuid()) @db.Uuid
+  examId           String       @db.Uuid
+  /// Reference back to the original question (nullable: original may be deleted)
+  sourceQuestionId String?      @db.Uuid
+  /// Snapshot fields — frozen at exam creation time
+  questionType     QuestionType
+  text             String       @db.Text
+  choicesPayload   Json?
+  explanation      String?      @db.Text
+  difficulty       Int          @default(3)
+  /// Points for this question in THIS specific exam
+  points           Float        @default(1.0)
+  /// Display order within the exam
+  sortOrder        Int          @default(0)
+  /// Version of the source question at snapshot time
+  sourceVersion    Int          @default(1)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  // Relations
+  exam           Exam            @relation(fields: [examId], references: [id], onDelete: Cascade)
+  sourceQuestion Question?       @relation("SourceQuestion", fields: [sourceQuestionId], references: [id], onDelete: SetNull)
+  answers        StudentAnswer[]
+
+  @@unique([examId, sortOrder])
+  @@index([examId])
+  @@index([sourceQuestionId])
+  @@map("exam_questions")
+}
+
+// ============================================================================
+// LIVE EXAM SESSION: ATTEMPTS, ANSWERS, AUTO-SAVE
+// ============================================================================
+
+model ExamAttempt {
+  id             String        @id @default(uuid()) @db.Uuid
+  examId         String        @db.Uuid
+  studentId      String        @db.Uuid
+  attemptNumber  Int           @default(1)
+  status         AttemptStatus @default(IN_PROGRESS)
+  /// Server-calculated absolute timestamps
+  startedAt      DateTime      @default(now())
+  /// Server-calculated: startedAt + exam.durationMinutes
+  expiresAt      DateTime
+  submittedAt    DateTime?
+  /// IP address captured at attempt start for security auditing
+  ipAddress      String?       @db.VarChar(45)
+  /// User-Agent string for device fingerprinting
+  userAgent      String?       @db.Text
+  /// Auto-save state: encrypted JSON blob persisted from Redis/WebSocket
+  /// Contains intermediate answers, navigation state, timer position, etc.
+  autoSaveState  Json?
+  /// Timestamp of the last auto-save sync
+  lastAutoSaveAt DateTime?
+  /// Raw score after grading
+  score          Float?
+  /// Score as percentage (0-100)
+  scorePercent   Float?
+  /// Optional teacher feedback
+  feedback       String?       @db.Text
+  /// ID of the teacher/grader who finalized the grade
+  gradedById     String?       @db.Uuid
+  gradedAt       DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  exam           Exam            @relation(fields: [examId], references: [id], onDelete: Restrict)
+  student        User            @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  gradedBy       User?           @relation("GradedBy", fields: [gradedById], references: [id], onDelete: SetNull)
+  answers        StudentAnswer[]
+  proctoringLogs ProctoringLog[]
+
+  /// A student can only have one IN_PROGRESS attempt per exam (enforced at app level too),
+  /// but the unique constraint ensures at most one record per exam+student+attemptNumber.
+  @@unique([examId, studentId, attemptNumber])
+  @@index([examId])
+  @@index([studentId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([examId, studentId])
+  @@map("exam_attempts")
+}
+
+model StudentAnswer {
+  id               String   @id @default(uuid()) @db.Uuid
+  attemptId        String   @db.Uuid
+  examQuestionId   String   @db.Uuid
+  /// For MCQ: selected choice label(s) as JSON. For TRUE_FALSE: boolean. For ESSAY: text.
+  answerPayload    Json?
+  /// Essay text stored separately for full-text search capability
+  essayText        String?  @db.Text
+  /// Whether this answer has been marked for review by the student
+  flaggedForReview Boolean  @default(false)
+  /// Points awarded (null = not yet graded)
+  pointsAwarded    Float?
+  /// Per-answer teacher feedback
+  feedback         String?  @db.Text
+  /// Time spent on this question in seconds
+  timeSpentSeconds Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  attempt      ExamAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  examQuestion ExamQuestion @relation(fields: [examQuestionId], references: [id], onDelete: Cascade)
+
+  /// A student can only answer each question once per attempt
+  @@unique([attemptId, examQuestionId])
+  @@index([attemptId])
+  @@index([examQuestionId])
+  @@map("student_answers")
+}
+
+// ============================================================================
+// PROCTORING & TELEMETRY
+// ============================================================================
+
+model ProctoringLog {
+  id            String        @id @default(uuid()) @db.Uuid
+  attemptId     String        @db.Uuid
+  violationType ViolationType
+  severity      SeverityLevel @default(MEDIUM)
+  /// Additional context about the violation event
+  details       Json?
+  /// IP address at the time of the violation
+  ipAddress     String?       @db.VarChar(45)
+  /// Precise timestamp of the violation event (client-reported)
+  occurredAt    DateTime
+  /// Server receive timestamp
+  createdAt     DateTime      @default(now())
+
+  // Relations
+  attempt ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+  @@index([violationType])
+  @@index([severity])
+  @@index([occurredAt])
+  @@index([attemptId, violationType])
+  @@map("proctoring_logs")
+}
+
+// ============================================================================
+// AUDIT LOG (System-wide audit trail)
+// ============================================================================
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  /// User who performed the action (null for system actions)
+  actorId    String?  @db.Uuid
+  /// The action performed, e.g. "exam.created", "attempt.submitted"
+  action     String   @db.VarChar(255)
+  /// The entity type affected, e.g. "Exam", "ExamAttempt"
+  entityType String   @db.VarChar(100)
+  /// The ID of the affected entity
+  entityId   String   @db.Uuid
+  /// Snapshot of changed fields (before/after)
+  metadata   Json?
+  ipAddress  String?  @db.VarChar(45)
+  userAgent  String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

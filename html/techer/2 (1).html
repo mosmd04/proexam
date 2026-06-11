@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بناء الأسئلة - إنشاء امتحان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo
+                        secondary: '#10B981', // Emerald
+                        dark: '#111827', // Gray 900
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        success: '#10B981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Drag handle hover effect */
+        .drag-handle { cursor: grab; }
+        .drag-handle:active { cursor: grabbing; }
+        
+        /* Card hover transition */
+        .question-card { transition: all 0.2s ease; border-left: 3px solid transparent; }
+        .question-card:hover { border-left-color: #4F46E5; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100">
+
+    <!-- القائمة الجانبية الشاملة -->
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0">
+        <div class="h-16 flex items-center justify-center border-b border-gray-800 shrink-0">
+            <div class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-graduation-cap text-primary"></i>
+                <span>بوابة المعلم</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6">
+            <nav class="space-y-1.5 px-4">
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3 px-2">القائمة الرئيسية</p>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-home text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    الرئيسية
+                </a>
+                
+                <!-- العنصر النشط: إدارة الامتحانات -->
+                <a href="#" class="bg-primary text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors shadow-md shadow-indigo-900/50">
+                    <i class="fas fa-edit text-lg w-6 text-center ml-2"></i>
+                    إدارة الامتحانات
+                </a>
+
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-database text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    بنك الأسئلة
+                </a>
+
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-video text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    المراقبة الحية
+                </a>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-users text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    الطلاب والنتائج
+                </a>
+                
+                <a href="#" class="text-gray-300 hover:bg-gray-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-chart-pie text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    التقارير والإحصائيات
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 flex items-center gap-3 shrink-0 hover:bg-gray-800 cursor-pointer transition-colors">
+            <div class="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center text-white font-bold relative">
+                د.م
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-dark rounded-full"></span>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-bold text-white truncate">د. محمود عبدالله</p>
+                <p class="text-xs text-gray-400 truncate">أستاذ مشارك - علوم الحاسب</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-20 relative">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">إنشاء امتحان جديد</h1>
+                <p class="text-sm text-gray-500 mt-0.5">امتحان منتصف الفصل - هياكل البيانات (CS301)</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="text-gray-500 hover:text-gray-800 font-bold text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-xl transition-colors">
+                    حفظ ومغادرة
+                </button>
+            </div>
+        </header>
+
+        <!-- Stepper (شريط الخطوات) -->
+        <div class="bg-white border-b border-gray-100 px-6 py-4 shrink-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.02)] z-10 relative">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center justify-between relative">
+                    <!-- خط الخلفية -->
+                    <div class="absolute top-1/2 right-0 left-0 h-1 bg-gray-100 -z-10 transform -translate-y-1/2 rounded-full"></div>
+                    <!-- خط التقدم الملون (واقف عند الخطوة 2) -->
+                    <div class="absolute top-1/2 right-0 w-1/2 h-1 bg-primary -z-10 transform -translate-y-1/2 rounded-full transition-all duration-500"></div>
+
+                    <!-- Step 1 (Completed) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative cursor-pointer group">
+                        <div class="w-10 h-10 rounded-full bg-success text-white flex items-center justify-center text-lg font-bold shadow-sm ring-4 ring-white group-hover:bg-emerald-600 transition-colors">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="text-sm font-bold text-gray-700">الإعدادات الأساسية</span>
+                    </div>
+
+                    <!-- Step 2 (Active) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative">
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-lg font-bold shadow-md shadow-indigo-200 ring-4 ring-white">
+                            2
+                        </div>
+                        <span class="text-sm font-bold text-primary">بناء الأسئلة</span>
+                    </div>
+
+                    <!-- Step 3 (Pending) -->
+                    <div class="flex flex-col items-center gap-2 bg-white px-4 relative">
+                        <div class="w-10 h-10 rounded-full bg-gray-50 border-2 border-gray-200 text-gray-400 flex items-center justify-center text-lg font-bold ring-4 ring-white">
+                            3
+                        </div>
+                        <span class="text-sm font-bold text-gray-400">المراجعة والنشر</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- مساحة العمل (Workspace) -->
+        <main class="flex-1 overflow-hidden p-6 flex flex-col lg:flex-row gap-6 scroll-smooth">
+            
+            <!-- العمود الأيمن: صندوق الأدوات (Toolbar) -->
+            <aside class="w-full lg:w-72 flex flex-col gap-4 shrink-0 h-fit">
+                
+                <!-- إحصائيات الامتحان الحالية -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+                    <h3 class="font-bold text-gray-800 border-b border-gray-100 pb-3 mb-3">ملخص الامتحان</h3>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-gray-500">إجمالي الأسئلة</span>
+                        <span class="font-black text-gray-800 text-lg">3</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">مجموع الدرجات</span>
+                        <span class="font-black text-primary text-xl" dir="ltr">15 / 100</span>
+                    </div>
+                    <div class="w-full bg-gray-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-primary h-full rounded-full" style="width: 15%"></div>
+                    </div>
+                </div>
+
+                <!-- إضافة أسئلة جديدة -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-2">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 pt-2 mb-2">إضافة سؤال جديد</p>
+                    
+                    <button class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-indigo-50 text-gray-700 hover:text-primary rounded-xl transition-colors text-right group">
+                        <div class="w-8 h-8 rounded-lg bg-gray-50 group-hover:bg-white border border-gray-100 group-hover:border-indigo-100 flex items-center justify-center shrink-0">
+                            <i class="fas fa-list-ul"></i>
+                        </div>
+                        <span class="text-sm font-bold">اختيار من متعدد</span>
+                    </button>
+                    
+                    <button class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-indigo-50 text-gray-700 hover:text-primary rounded-xl transition-colors text-right group">
+                        <div class="w-8 h-8 rounded-lg bg-gray-50 group-hover:bg-white border border-gray-100 group-hover:border-indigo-100 flex items-center justify-center shrink-0">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                        <span class="text-sm font-bold">صح أو خطأ</span>
+                    </button>
+                    
+                    <button class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-indigo-50 text-gray-700 hover:text-primary rounded-xl transition-colors text-right group">
+                        <div class="w-8 h-8 rounded-lg bg-gray-50 group-hover:bg-white border border-gray-100 group-hover:border-indigo-100 flex items-center justify-center shrink-0">
+                            <i class="fas fa-align-left"></i>
+                        </div>
+                        <span class="text-sm font-bold">سؤال مقالي (نصي)</span>
+                    </button>
+                    
+                    <div class="my-2 border-t border-gray-100 mx-3"></div>
+                    
+                    <button class="w-full flex items-center gap-3 px-3 py-2.5 bg-gray-800 hover:bg-gray-900 text-white rounded-xl transition-colors text-right shadow-sm mt-1">
+                        <div class="w-8 h-8 rounded-lg bg-gray-700 flex items-center justify-center shrink-0 text-white">
+                            <i class="fas fa-cloud-download-alt"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-sm font-bold block">استيراد من البنك</span>
+                            <span class="text-[10px] text-gray-300">سحب أسئلة جاهزة</span>
+                        </div>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- العمود الأيسر: محرر الأسئلة المُضافة -->
+            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full relative">
+                
+                <div class="p-4 border-b border-gray-100 bg-white flex justify-between items-center z-10 shrink-0">
+                    <h2 class="font-bold text-gray-800">الأسئلة المُضافة للامتحان</h2>
+                    <button class="text-sm text-primary font-bold hover:underline">ترتيب عشوائي</button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-slate-50/50 pb-24">
+                    
+                    <!-- البطاقة 1: سؤال خيارات -->
+                    <div class="question-card bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex">
+                        <!-- مسكة السحب (Drag Handle) -->
+                        <div class="w-8 bg-gray-50 border-l border-gray-100 flex items-center justify-center drag-handle text-gray-400 hover:text-primary hover:bg-indigo-50 transition-colors shrink-0">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
+                        
+                        <div class="flex-1 p-4 md:p-5">
+                            <div class="flex items-start justify-between mb-4 gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-xs font-bold text-white bg-gray-800 px-2 py-0.5 rounded shadow-sm">سؤال 1</span>
+                                        <span class="text-[10px] font-bold text-primary bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded">خيارات متعددة</span>
+                                    </div>
+                                    <h3 class="font-bold text-gray-800 text-base leading-relaxed">أي من هياكل البيانات التالية يعمل بمبدأ LIFO (الأخير دخولاً، الأول خروجاً)؟</h3>
+                                </div>
+                                <!-- تخصيص الدرجة -->
+                                <div class="shrink-0 text-center bg-gray-50 border border-gray-200 rounded-lg p-2">
+                                    <input type="number" value="5" min="1" class="w-12 text-center bg-white border border-gray-300 rounded font-bold text-gray-800 py-1 outline-none focus:border-primary">
+                                    <span class="block text-[10px] font-bold text-gray-500 mt-1">درجات</span>
+                                </div>
+                            </div>
+
+                            <!-- الخيارات -->
+                            <div class="space-y-2 mt-4 pl-2 border-r-2 border-gray-100">
+                                <div class="flex items-center gap-3 text-sm text-gray-600">
+                                    <div class="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-[10px]">A</div>
+                                    الطابور (Queue)
+                                </div>
+                                <div class="flex items-center gap-3 text-sm font-bold text-success bg-green-50 p-1.5 rounded-lg border border-green-100 w-max pr-4">
+                                    <div class="w-5 h-5 rounded-full bg-success text-white flex items-center justify-center text-[10px]"><i class="fas fa-check"></i></div>
+                                    المكدس (Stack)
+                                </div>
+                                <div class="flex items-center gap-3 text-sm text-gray-600">
+                                    <div class="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-[10px]">C</div>
+                                    الشجرة (Tree)
+                                </div>
+                            </div>
+                            
+                            <!-- أزرار التحكم بالسؤال -->
+                            <div class="mt-5 pt-3 border-t border-gray-100 flex items-center gap-3">
+                                <button class="text-xs font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1.5"><i class="fas fa-pen"></i> تحرير</button>
+                                <button class="text-xs font-bold text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1.5"><i class="far fa-copy"></i> تكرار</button>
+                                <button class="text-xs font-bold text-danger hover:text-red-700 transition-colors flex items-center gap-1.5 mr-auto"><i class="fas fa-trash-alt"></i> حذف</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- البطاقة 2: سؤال صح وخطأ -->
+                    <div class="question-card bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex">
+                        <div class="w-8 bg-gray-50 border-l border-gray-100 flex items-center justify-center drag-handle text-gray-400 hover:text-primary hover:bg-indigo-50 transition-colors shrink-0">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
+                        
+                        <div class="flex-1 p-4 md:p-5">
+                            <div class="flex items-start justify-between mb-4 gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-xs font-bold text-white bg-gray-800 px-2 py-0.5 rounded shadow-sm">سؤال 2</span>
+                                        <span class="text-[10px] font-bold text-secondary bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded">صح أو خطأ</span>
+                                    </div>
+                                    <h3 class="font-bold text-gray-800 text-base leading-relaxed">البحث الثنائي (Binary Search) يمكن تطبيقه على المصفوفات غير المرتبة.</h3>
+                                </div>
+                                <div class="shrink-0 text-center bg-gray-50 border border-gray-200 rounded-lg p-2">
+                                    <input type="number" value="3" min="1" class="w-12 text-center bg-white border border-gray-300 rounded font-bold text-gray-800 py-1 outline-none focus:border-primary">
+                                    <span class="block text-[10px] font-bold text-gray-500 mt-1">درجات</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4 mt-2">
+                                <span class="px-6 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-sm font-medium bg-gray-50">صح</span>
+                                <span class="px-6 py-1.5 rounded-lg border border-success text-success bg-green-50 text-sm font-bold flex items-center gap-2"><i class="fas fa-check"></i> خطأ</span>
+                            </div>
+                            
+                            <div class="mt-5 pt-3 border-t border-gray-100 flex items-center gap-3">
+                                <button class="text-xs font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1.5"><i class="fas fa-pen"></i> تحرير</button>
+                                <button class="text-xs font-bold text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1.5"><i class="far fa-copy"></i> تكرار</button>
+                                <button class="text-xs font-bold text-danger hover:text-red-700 transition-colors flex items-center gap-1.5 mr-auto"><i class="fas fa-trash-alt"></i> حذف</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- البطاقة 3: سؤال مقالي (نمط التحرير النشط) -->
+                    <div class="question-card bg-indigo-50/30 border-2 border-primary rounded-xl shadow-md overflow-hidden flex relative">
+                        <div class="w-8 bg-indigo-100 border-l border-indigo-200 flex items-center justify-center drag-handle text-primary shrink-0">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
+                        
+                        <div class="flex-1 p-4 md:p-5">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-xs font-bold text-white bg-primary px-2 py-0.5 rounded shadow-sm">سؤال 3 (قيد التحرير)</span>
+                                <span class="text-[10px] font-bold text-warning bg-orange-50 border border-orange-200 px-2 py-0.5 rounded">سؤال مقالي</span>
+                            </div>
+                            
+                            <!-- حقل تحرير السؤال -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1.5">نص السؤال</label>
+                                    <textarea rows="2" class="w-full px-4 py-2.5 bg-white border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-inner resize-y">اشرح باختصار الفرق الأساسي بين الـ Array والـ Linked List من حيث تخزين الذاكرة.</textarea>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1.5">الدرجة المخصصة</label>
+                                        <input type="number" value="7" min="1" class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary font-bold">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1.5">الحد الأقصى للأسطر (الطالب)</label>
+                                        <select class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                                            <option>قصير (5 أسطر)</option>
+                                            <option selected>متوسط (10 أسطر)</option>
+                                            <option>طويل (مفتوح)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-5 pt-3 border-t border-indigo-100 flex items-center justify-end gap-3">
+                                <button class="px-4 py-1.5 bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg text-xs font-bold transition-colors">إلغاء</button>
+                                <button class="px-4 py-1.5 bg-primary hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors">حفظ السؤال</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Sticky Footer for Actions -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.08)] md:pl-6 md:pr-72 z-30 transition-all">
+            <button class="px-6 py-2.5 text-gray-600 font-bold text-sm hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-2 border border-gray-200 hover:border-gray-300 bg-white shadow-sm">
+                <i class="fas fa-arrow-right"></i> السابق
+            </button>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-gray-400 hidden sm:block">تم الحفظ تلقائياً قبل دقيقة</span>
+                <button class="px-8 py-2.5 bg-primary hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-colors flex items-center gap-2">
+                    التالي: المراجعة والنشر <i class="fas fa-check-circle"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

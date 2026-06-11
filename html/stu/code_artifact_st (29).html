@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداء الامتحان - هياكل البيانات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo
+                        secondary: '#10B981', // Emerald
+                        dark: '#0F172A', // Slate 900
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* خلفية هادئة جداً لتقليل التشتت */
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* تأثيرات بطاقات الإجابة (Radio Cards) */
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-radio:checked + .option-card {
+            border-color: #4F46E5;
+            background-color: #EEF2FF;
+            transform: scale(1.01);
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1);
+        }
+        .option-radio:checked + .option-card .radio-indicator {
+            border-color: #4F46E5;
+            background-color: #4F46E5;
+        }
+        .option-radio:checked + .option-card .radio-indicator::after {
+            transform: scale(1);
+        }
+        .radio-indicator::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 8px; height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease-out;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex flex-col h-screen overflow-hidden selection:bg-indigo-100">
+
+    <!-- شريط التقدم العلوي (خط رفيع جداً) -->
+    <div class="h-1.5 w-full bg-gray-200 z-50 fixed top-0">
+        <div class="h-full bg-primary transition-all duration-500 ease-out" style="width: 45%;"></div>
+    </div>
+
+    <!-- Header (شريط علوي آمن ونظيف) -->
+    <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shrink-0 z-40 relative mt-1.5">
+        
+        <!-- اليمين: معلومات الامتحان والأمان -->
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-indigo-50 text-primary rounded-xl flex items-center justify-center shrink-0 border border-indigo-100">
+                <i class="fas fa-shield-alt text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-gray-800 leading-tight text-lg">هياكل البيانات (CS301)</h1>
+                <div class="flex items-center gap-2 text-xs font-bold mt-0.5">
+                    <span class="text-success flex items-center gap-1"><i class="fas fa-lock text-[10px]"></i> بيئة آمنة</span>
+                    <span class="text-gray-300">•</span>
+                    <span class="text-gray-500">أحمد محمود عبدالله</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- المنتصف: المؤقت الزمني (بارز ولكن غير مزعج) -->
+        <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden md:flex">
+            <div class="bg-dark text-white px-6 py-2.5 rounded-2xl font-bold tracking-widest text-xl flex items-center gap-3 shadow-lg shadow-slate-900/20 border border-slate-700">
+                <i class="far fa-clock text-slate-400"></i> 
+                <span dir="ltr">45 : 12</span>
+            </div>
+        </div>
+
+        <!-- اليسار: زر التسليم النهائي -->
+        <button class="bg-red-50 hover:bg-danger text-danger hover:text-white font-bold px-6 py-2.5 rounded-xl transition-all duration-300 border border-red-200 hover:border-danger flex items-center gap-2 shadow-sm">
+            <i class="fas fa-flag-checkered"></i>
+            <span class="hidden sm:inline">إنهاء وتسليم</span>
+        </button>
+        
+        <!-- المؤقت للموبايل (يظهر فقط في الشاشات الصغيرة) -->
+        <div class="md:hidden bg-dark text-white px-3 py-1.5 rounded-lg font-bold tracking-wider text-sm flex items-center gap-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <span dir="ltr">45:12</span>
+        </div>
+    </header>
+
+    <!-- مساحة العمل الرئيسية -->
+    <main class="flex-1 flex overflow-hidden w-full relative">
+        
+        <!-- العمود الأيمن: خريطة الأسئلة (Sidebar Navigator) -->
+        <aside class="w-72 bg-white border-l border-gray-200 flex flex-col shrink-0 h-full shadow-[4px_0_15px_rgba(0,0,0,0.03)] z-10 hidden lg:flex">
+            
+            <div class="p-5 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800">خريطة الامتحان</h3>
+                <p class="text-xs text-gray-500 mt-1">المُجاب: 13 من 30 سؤال</p>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-5">
+                <!-- شبكة أرقام الأسئلة -->
+                <div class="grid grid-cols-5 gap-2.5 text-sm font-bold" dir="ltr">
+                    
+                    <!-- حالات الأزرار -->
+                    <!-- 1. مُجاب (أخضر أو أزرق داكن) -->
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">1</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">2</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">3</button>
+                    
+                    <!-- 2. مؤجل للمراجعة (برتقالي) -->
+                    <button class="aspect-square rounded-lg bg-orange-50 border border-warning text-warning flex items-center justify-center relative hover:bg-orange-100 transition-colors">
+                        4
+                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-warning rounded-full border-2 border-white"></span>
+                    </button>
+                    
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">5</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">6</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">7</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">8</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">9</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">10</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">11</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">12</button>
+                    <button class="aspect-square rounded-lg bg-indigo-50 border border-indigo-200 text-primary flex items-center justify-center hover:bg-indigo-100 transition-colors">13</button>
+                    
+                    <!-- 3. السؤال الحالي (نشط بوضوح) -->
+                    <button class="aspect-square rounded-lg bg-primary text-white flex items-center justify-center shadow-md shadow-indigo-300 transform scale-110 ring-2 ring-primary ring-offset-2 z-10">14</button>
+                    
+                    <!-- 4. لم تتم الإجابة بعد (رمادي) -->
+                    <button class="aspect-square rounded-lg bg-white border border-gray-200 text-gray-500 hover:border-gray-400 transition-colors flex items-center justify-center">15</button>
+                    <button class="aspect-square rounded-lg bg-white border border-gray-200 text-gray-500 hover:border-gray-400 transition-colors flex items-center justify-center">16</button>
+                    <button class="aspect-square rounded-lg bg-white border border-gray-200 text-gray-500 hover:border-gray-400 transition-colors flex items-center justify-center">17</button>
+                    <button class="aspect-square rounded-lg bg-white border border-gray-200 text-gray-500 hover:border-gray-400 transition-colors flex items-center justify-center">18</button>
+                    <button class="aspect-square rounded-lg bg-white border border-gray-200 text-gray-500 hover:border-gray-400 transition-colors flex items-center justify-center">19</button>
+                    <button class="aspect-square rounded-lg bg-white border border-gray-200 text-gray-500 hover:border-gray-400 transition-colors flex items-center justify-center">20</button>
+                    <!-- ... -->
+                </div>
+            </div>
+
+            <!-- مفتاح الخريطة (Legend) -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50/50 text-xs font-bold">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="flex items-center gap-2 text-gray-600"><span class="w-3 h-3 rounded bg-indigo-100 border border-indigo-200"></span> مُجاب</span>
+                    <span class="flex items-center gap-2 text-gray-600"><span class="w-3 h-3 rounded bg-white border border-gray-300"></span> غير مُجاب</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="flex items-center gap-2 text-gray-600"><span class="w-3 h-3 rounded bg-primary"></span> الحالي</span>
+                    <span class="flex items-center gap-2 text-gray-600"><span class="w-3 h-3 rounded bg-warning"></span> للمراجعة</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- منطقة السؤال (المركزية) -->
+        <section class="flex-1 overflow-y-auto flex flex-col relative pb-32">
+            
+            <div class="max-w-4xl mx-auto w-full p-6 md:p-10">
+                
+                <!-- ترويسة السؤال -->
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-4">
+                        <span class="w-12 h-12 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center font-black text-xl text-gray-800 shadow-sm">14</span>
+                        <div>
+                            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">السؤال الرابع عشر</h2>
+                            <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold border border-gray-200">اختيار من متعدد</span>
+                        </div>
+                    </div>
+                    <span class="text-sm font-bold text-gray-500 flex items-center gap-1.5 bg-white px-4 py-1.5 rounded-full border border-gray-200 shadow-sm">
+                        <i class="fas fa-star text-yellow-400"></i> درجتان
+                    </span>
+                </div>
+
+                <!-- نص السؤال -->
+                <div class="mb-10">
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800 leading-normal">
+                        في هيكل البيانات "شجرة البحث الثنائية" (Binary Search Tree)، ما هو التعقيد الزمني (Time Complexity) المتوقع للبحث عن عنصر في حالة كانت الشجرة <span class="text-primary underline decoration-primary/30 underline-offset-4">غير متوازنة تماماً (Skewed Tree)</span>؟
+                    </h3>
+                </div>
+
+                <!-- خيارات الإجابة -->
+                <div class="space-y-4">
+                    
+                    <!-- الخيار A -->
+                    <label class="block relative cursor-pointer group">
+                        <input type="radio" name="answer_q14" class="option-radio sr-only">
+                        <div class="option-card bg-white border-2 border-gray-200 rounded-2xl p-5 md:p-6 flex items-center gap-5 hover:border-gray-300">
+                            <!-- مؤشر الراديو المخصص -->
+                            <div class="radio-indicator w-6 h-6 rounded-full border-2 border-gray-300 shrink-0 relative transition-colors group-hover:border-primary"></div>
+                            
+                            <span class="text-xl font-bold text-gray-700 flex-1" dir="ltr">O(log n)</span>
+                            
+                            <!-- اختصار الكيبورد -->
+                            <div class="hidden md:flex w-8 h-8 rounded bg-gray-50 border border-gray-200 items-center justify-center text-xs font-bold text-gray-400 shrink-0">A</div>
+                        </div>
+                    </label>
+
+                    <!-- الخيار B -->
+                    <label class="block relative cursor-pointer group">
+                        <input type="radio" name="answer_q14" class="option-radio sr-only" checked>
+                        <div class="option-card bg-white border-2 border-gray-200 rounded-2xl p-5 md:p-6 flex items-center gap-5 hover:border-gray-300">
+                            <div class="radio-indicator w-6 h-6 rounded-full border-2 border-gray-300 shrink-0 relative transition-colors group-hover:border-primary"></div>
+                            <span class="text-xl font-bold text-gray-700 flex-1" dir="ltr">O(n)</span>
+                            <div class="hidden md:flex w-8 h-8 rounded bg-gray-50 border border-gray-200 items-center justify-center text-xs font-bold text-gray-400 shrink-0">B</div>
+                        </div>
+                    </label>
+
+                    <!-- الخيار C -->
+                    <label class="block relative cursor-pointer group">
+                        <input type="radio" name="answer_q14" class="option-radio sr-only">
+                        <div class="option-card bg-white border-2 border-gray-200 rounded-2xl p-5 md:p-6 flex items-center gap-5 hover:border-gray-300">
+                            <div class="radio-indicator w-6 h-6 rounded-full border-2 border-gray-300 shrink-0 relative transition-colors group-hover:border-primary"></div>
+                            <span class="text-xl font-bold text-gray-700 flex-1" dir="ltr">O(n log n)</span>
+                            <div class="hidden md:flex w-8 h-8 rounded bg-gray-50 border border-gray-200 items-center justify-center text-xs font-bold text-gray-400 shrink-0">C</div>
+                        </div>
+                    </label>
+
+                    <!-- الخيار D -->
+                    <label class="block relative cursor-pointer group">
+                        <input type="radio" name="answer_q14" class="option-radio sr-only">
+                        <div class="option-card bg-white border-2 border-gray-200 rounded-2xl p-5 md:p-6 flex items-center gap-5 hover:border-gray-300">
+                            <div class="radio-indicator w-6 h-6 rounded-full border-2 border-gray-300 shrink-0 relative transition-colors group-hover:border-primary"></div>
+                            <span class="text-xl font-bold text-gray-700 flex-1" dir="ltr">O(1)</span>
+                            <div class="hidden md:flex w-8 h-8 rounded bg-gray-50 border border-gray-200 items-center justify-center text-xs font-bold text-gray-400 shrink-0">D</div>
+                        </div>
+                    </label>
+
+                </div>
+
+            </div>
+            
+            <!-- شريط التنقل السفلي (Floating Navigation Bar) -->
+            <!-- يكون ثابت في أسفل شاشة السؤال دائماً -->
+            <div class="fixed bottom-0 left-0 right-0 lg:right-72 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 z-30 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+                <div class="max-w-4xl mx-auto flex items-center justify-between">
+                    
+                    <!-- زر السابق -->
+                    <button class="px-5 py-3 md:px-8 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="hidden sm:inline">السؤال السابق</span>
+                    </button>
+                    
+                    <!-- زر المراجعة (Flag) -->
+                    <label class="flex items-center gap-3 cursor-pointer group px-4 py-2 rounded-lg hover:bg-orange-50 transition-colors border border-transparent hover:border-orange-100">
+                        <input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-warning focus:ring-warning cursor-pointer">
+                        <span class="text-sm font-bold text-gray-600 group-hover:text-warning transition-colors">تحديد للمراجعة لاحقاً</span>
+                    </label>
+
+                    <!-- زر التالي -->
+                    <button class="px-5 py-3 md:px-10 bg-primary hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center gap-2 transform hover:-translate-y-0.5">
+                        <span class="hidden sm:inline">السؤال التالي</span>
+                        <span class="sm:hidden">التالي</span>
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

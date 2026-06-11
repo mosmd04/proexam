@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين والصلاحيات - الإدارة العليا</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#10B981', // Emerald 500
+                        dark: '#0F172A', // Slate 900
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        info: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #F8FAFC; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Table enhancements */
+        .table-row-hover:hover td { background-color: #F1F5F9; transition: background-color 0.2s ease; }
+        
+        /* Custom checkbox */
+        .custom-checkbox:checked { background-color: #4F46E5; border-color: #4F46E5; }
+        
+        /* Tab animation */
+        .tab-indicator { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+
+    <aside class="w-64 bg-dark text-white shadow-xl hidden md:flex flex-col h-full z-20 shrink-0 relative overflow-hidden">
+        <!-- Decorative Background Elements -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary rounded-full mix-blend-multiply filter blur-2xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+        
+        <div class="h-16 flex items-center justify-center border-b border-slate-800 relative z-10">
+            <div class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-shield-alt text-primary"></i>
+                <span>الإدارة العليا</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6 relative z-10">
+            <nav class="space-y-1 px-4">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 px-2">إدارة النظام</p>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors">
+                    <i class="fas fa-chart-line text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    نظرة عامة
+                </a>
+                
+                <!-- Active Item -->
+                <a href="#" class="bg-primary/10 border border-primary/20 text-indigo-400 group flex items-center px-3 py-2.5 text-sm font-bold rounded-xl transition-colors shadow-sm mt-1">
+                    <i class="fas fa-users-cog text-lg w-6 text-center ml-2"></i>
+                    المستخدمين والصلاحيات
+                </a>
+
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-university text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    الكليات والأقسام
+                </a>
+                
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-server text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    حالة الخوادم
+                </a>
+                
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3 mt-6 px-2">الإعدادات</p>
+
+                <a href="#" class="text-slate-400 hover:bg-slate-800 hover:text-white group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-colors mt-1">
+                    <i class="fas fa-cog text-lg w-6 text-center ml-2 text-slate-500 group-hover:text-primary transition-colors"></i>
+                    إعدادات المنظومة
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-800 flex items-center gap-3 relative z-10 bg-slate-900/50">
+            <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-white font-bold">
+                ع.م
+            </div>
+            <div>
+                <p class="text-sm font-bold text-white">عمر مصطفى</p>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_5px_#10B981]"></span>
+                    <p class="text-xs text-slate-400">مدير النظام (Super Admin)</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row items-center justify-between shrink-0 shadow-sm z-10 gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">المستخدمين والصلاحيات</h1>
+                <p class="text-sm text-slate-500 mt-0.5">إدارة حسابات النظام وتعيين الأدوار والمستويات</p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <button class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap">
+                    <i class="fas fa-file-export text-slate-400"></i> تصدير البيانات
+                </button>
+                <button class="px-4 py-2 bg-primary hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i class="fas fa-user-plus"></i> إضافة مستخدم
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6">
+            <div class="max-w-7xl mx-auto flex flex-col h-full gap-6">
+
+                <!-- Tabs -->
+                <div class="border-b border-slate-200 relative shrink-0">
+                    <nav class="flex gap-8 px-2">
+                        <a href="#" class="pb-3 text-sm font-bold text-primary border-b-2 border-primary relative z-10 flex items-center gap-2">
+                            <i class="fas fa-users"></i> قائمة المستخدمين
+                        </a>
+                        <a href="#" class="pb-3 text-sm font-bold text-slate-500 hover:text-slate-700 border-b-2 border-transparent hover:border-slate-300 relative z-10 flex items-center gap-2 transition-colors">
+                            <i class="fas fa-key"></i> إدارة الأدوار والصلاحيات
+                        </a>
+                        <a href="#" class="pb-3 text-sm font-bold text-slate-500 hover:text-slate-700 border-b-2 border-transparent hover:border-slate-300 relative z-10 flex items-center gap-2 transition-colors">
+                            <i class="fas fa-user-shield"></i> سجل الدخول (Access Logs)
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Filters Bar -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col lg:flex-row items-center justify-between gap-4 shrink-0">
+                    
+                    <!-- Search -->
+                    <div class="relative w-full lg:w-96">
+                        <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" placeholder="ابحث بالاسم، الرقم الجامعي، أو البريد..." class="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                    </div>
+
+                    <!-- Filter Dropdowns -->
+                    <div class="flex items-center gap-3 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0">
+                        <select class="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl focus:ring-primary focus:border-primary block px-4 py-2.5 outline-none cursor-pointer font-medium min-w-[140px]">
+                            <option>جميع الأدوار</option>
+                            <option>طلاب (Students)</option>
+                            <option>أساتذة (Teachers)</option>
+                            <option>مشرفين (Staff)</option>
+                            <option>مدراء (Admins)</option>
+                        </select>
+                        
+                        <select class="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl focus:ring-primary focus:border-primary block px-4 py-2.5 outline-none cursor-pointer font-medium min-w-[140px]">
+                            <option>الكلية / القسم</option>
+                            <option>كلية الحاسبات</option>
+                            <option>كلية الهندسة</option>
+                            <option>كلية الطب</option>
+                        </select>
+
+                        <select class="bg-white border border-slate-200 text-slate-700 text-sm rounded-xl focus:ring-primary focus:border-primary block px-4 py-2.5 outline-none cursor-pointer font-medium min-w-[140px]">
+                            <option>الحالة: الكل</option>
+                            <option>نشط</option>
+                            <option>غير نشط</option>
+                            <option>محظور (Banned)</option>
+                        </select>
+
+                        <button class="w-10 h-10 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-primary hover:border-primary hover:bg-indigo-50 flex items-center justify-center transition-all shrink-0">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Data Grid -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col flex-1 overflow-hidden">
+                    
+                    <!-- Bulk Actions Bar (Simulated Active State) -->
+                    <div class="px-6 py-3 border-b border-slate-100 bg-indigo-50/50 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-bold text-primary bg-white px-2 py-0.5 rounded border border-indigo-100">تم تحديد 2</span>
+                            <span class="text-xs text-slate-500 font-medium">مستخدمين</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm">
+                                <i class="fas fa-envelope mr-1"></i> إرسال رسالة
+                            </button>
+                            <button class="px-3 py-1.5 bg-white border border-red-200 text-danger rounded-lg text-xs font-bold hover:bg-red-50 transition-colors shadow-sm">
+                                <i class="fas fa-ban mr-1"></i> حظر المحدد
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-auto">
+                        <table class="w-full text-right whitespace-nowrap">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold tracking-wider sticky top-0 z-10">
+                                <tr>
+                                    <th class="p-4 w-12 text-center">
+                                        <input type="checkbox" class="custom-checkbox w-4 h-4 text-primary bg-white border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors" checked>
+                                    </th>
+                                    <th class="p-4">المستخدم</th>
+                                    <th class="p-4">الرقم / البريد</th>
+                                    <th class="p-4">الدور والصلاحية</th>
+                                    <th class="p-4">الكلية - القسم</th>
+                                    <th class="p-4">تاريخ الانضمام</th>
+                                    <th class="p-4">الحالة</th>
+                                    <th class="p-4 text-center">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                                
+                                <!-- User 1: Admin -->
+                                <tr class="table-row-hover bg-indigo-50/20">
+                                    <td class="p-4 text-center">
+                                        <input type="checkbox" class="custom-checkbox w-4 h-4 text-primary bg-white border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors" checked>
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-sm shadow-sm">ع.م</div>
+                                            <div>
+                                                <p class="font-bold text-slate-900">عمر مصطفى <i class="fas fa-shield-alt text-primary ml-1 text-xs" title="مدير نظام"></i></p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-slate-500 text-xs">omar.m@univ.edu.ly</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800 text-white text-xs font-bold shadow-sm">
+                                            <i class="fas fa-crown text-yellow-400"></i> Super Admin
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-slate-600">إدارة الجامعة <span class="text-slate-400 mx-1">|</span> تقنية المعلومات</td>
+                                    <td class="p-4 text-slate-500 text-xs">15 يناير 2024</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 text-secondary text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-secondary"></span> نشط
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-indigo-50 transition-colors"><i class="fas fa-pen"></i></button>
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"><i class="fas fa-cog"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- User 2: Teacher -->
+                                <tr class="table-row-hover bg-white">
+                                    <td class="p-4 text-center">
+                                        <input type="checkbox" class="custom-checkbox w-4 h-4 text-primary bg-white border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors" checked>
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://ui-avatars.com/api/?name=Mahmoud+Abdullah&background=EEF2FF&color=4F46E5" class="w-9 h-9 rounded-full border border-slate-200" alt="Avatar">
+                                            <div>
+                                                <p class="font-bold text-slate-900">د. محمود عبدالله</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-slate-500 text-xs">m.abdullah@univ.edu.ly</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 text-primary border border-indigo-100 text-xs font-bold">
+                                            <i class="fas fa-chalkboard-teacher"></i> Teacher
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-slate-600">كلية الحاسبات <span class="text-slate-400 mx-1">|</span> هندسة برمجيات</td>
+                                    <td class="p-4 text-slate-500 text-xs">01 سبتمبر 2024</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 text-secondary text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-secondary"></span> نشط
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-indigo-50 transition-colors"><i class="fas fa-pen"></i></button>
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="إعادة تعيين كلمة المرور"><i class="fas fa-key"></i></button>
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-danger hover:bg-red-50 transition-colors" title="إيقاف الحساب"><i class="fas fa-ban"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- User 3: Student (Active) -->
+                                <tr class="table-row-hover bg-white">
+                                    <td class="p-4 text-center">
+                                        <input type="checkbox" class="custom-checkbox w-4 h-4 text-primary bg-white border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-emerald-50 text-secondary flex items-center justify-center font-bold text-sm border border-emerald-100">أ</div>
+                                            <div>
+                                                <p class="font-bold text-slate-900">أحمد محمود خليل</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-slate-500 text-xs font-bold" dir="ltr">20240015</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-secondary border border-emerald-100 text-xs font-bold">
+                                            <i class="fas fa-user-graduate"></i> Student
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-slate-600">كلية الحاسبات <span class="text-slate-400 mx-1">|</span> تقنية معلومات</td>
+                                    <td class="p-4 text-slate-500 text-xs">10 أكتوبر 2024</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 text-secondary text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-secondary"></span> نشط
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-indigo-50 transition-colors"><i class="fas fa-pen"></i></button>
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="إعادة تعيين كلمة المرور"><i class="fas fa-key"></i></button>
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-danger hover:bg-red-50 transition-colors" title="إيقاف الحساب"><i class="fas fa-ban"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- User 4: Student (Banned) -->
+                                <tr class="table-row-hover bg-red-50/30 opacity-80">
+                                    <td class="p-4 text-center">
+                                        <input type="checkbox" class="custom-checkbox w-4 h-4 text-primary bg-white border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-sm border border-slate-200">خ</div>
+                                            <div>
+                                                <p class="font-bold text-slate-900 line-through decoration-slate-400">خالد يوسف إبراهيم</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-slate-500 text-xs font-bold" dir="ltr">20240188</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-secondary border border-emerald-100 text-xs font-bold">
+                                            <i class="fas fa-user-graduate"></i> Student
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-slate-600">كلية الهندسة <span class="text-slate-400 mx-1">|</span> مدني</td>
+                                    <td class="p-4 text-slate-500 text-xs">10 أكتوبر 2024</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-red-100 text-danger text-[10px] uppercase font-black border border-red-200">
+                                            <i class="fas fa-lock text-[8px]"></i> محظور
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-success hover:bg-green-50 transition-colors" title="فك الحظر"><i class="fas fa-unlock"></i></button>
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-danger hover:bg-red-50 transition-colors" title="حذف نهائي"><i class="fas fa-trash-alt"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <!-- User 5: Staff/Observer -->
+                                <tr class="table-row-hover bg-white">
+                                    <td class="p-4 text-center">
+                                        <input type="checkbox" class="custom-checkbox w-4 h-4 text-primary bg-white border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors">
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-amber-50 text-warning flex items-center justify-center font-bold text-sm border border-amber-100">س</div>
+                                            <div>
+                                                <p class="font-bold text-slate-900">سالم عبدالكريم</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-slate-500 text-xs">salem.a@univ.edu.ly</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-warning border border-amber-100 text-xs font-bold">
+                                            <i class="fas fa-eye"></i> Observer (مراقب)
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-slate-600">شؤون الطلاب <span class="text-slate-400 mx-1">|</span> الامتحانات</td>
+                                    <td class="p-4 text-slate-500 text-xs">20 فبراير 2025</td>
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 text-slate-400 text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-slate-300"></span> غير متصل
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-primary hover:bg-indigo-50 transition-colors"><i class="fas fa-pen"></i></button>
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"><i class="fas fa-key"></i></button>
+                                            <button class="w-8 h-8 rounded-lg text-slate-400 hover:text-danger hover:bg-red-50 transition-colors"><i class="fas fa-ban"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination Footer -->
+                    <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-sm text-slate-500 shrink-0">
+                        <span>عرض 1 إلى 5 من أصل 12,450 مستخدم</span>
+                        <div class="flex items-center gap-2">
+                            <button class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-400 disabled:opacity-50 font-bold transition-colors" disabled>السابق</button>
+                            <button class="px-3 py-1.5 border border-primary bg-primary text-white rounded-lg font-bold shadow-sm">1</button>
+                            <button class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 font-bold transition-colors">2</button>
+                            <button class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 font-bold transition-colors">3</button>
+                            <span class="px-1 text-slate-400">...</span>
+                            <button class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 font-bold transition-colors">التالي</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

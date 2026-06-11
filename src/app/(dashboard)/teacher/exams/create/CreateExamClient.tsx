@@ -591,7 +591,7 @@ export default function CreateExamClient({
                   <div className="border-t border-slate-100 pt-3 mt-3">
                     <button 
                       onClick={handleOpenBankModal} 
-                      className="w-full p-3.5 text-center bg-violet-650 hover:bg-violet-700 text-white rounded-xl font-extrabold text-xs transition-all shadow-md shadow-violet-500/10 flex items-center justify-center gap-2 hover:-translate-y-0.5"
+                      className="w-full p-3.5 text-center bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-extrabold text-xs transition-all shadow-md shadow-violet-500/10 flex items-center justify-center gap-2 hover:-translate-y-0.5"
                     >
                       <i className="fas fa-database"></i> استيراد من بنك الأسئلة
                     </button>
@@ -650,7 +650,7 @@ export default function CreateExamClient({
                         
                         {/* Imported from question bank badge */}
                         {q.sourceQuestionId && (
-                          <span className="text-[10px] bg-violet-100 text-violet-750 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <span className="text-[10px] bg-violet-100 text-violet-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
                             <i className="fas fa-database text-[8px]"></i> مستورد من بنك الأسئلة
                           </span>
                         )}
@@ -822,7 +822,7 @@ export default function CreateExamClient({
                           {q.type === 'mcq' ? 'اختيار متعدد' : q.type === 'tf' ? 'صح/خطأ' : 'مقالي'}
                         </span>
                         {q.sourceQuestionId && (
-                          <span className="text-[9px] bg-violet-100 text-violet-750 px-1.5 py-0.5 rounded font-extrabold">
+                          <span className="text-[9px] bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded font-extrabold">
                             مستورد
                           </span>
                         )}
@@ -1251,7 +1251,7 @@ export default function CreateExamClient({
               <button 
                 onClick={handleImportSelected}
                 disabled={selectedBankQuestionIds.length === 0}
-                className="px-6 py-2.5 bg-violet-600 hover:bg-violet-750 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-violet-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-violet-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 استيراد الأسئلة المختارة ({selectedBankQuestionIds.length})
               </button>

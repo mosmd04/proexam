@@ -250,6 +250,19 @@ export default function Sidebar({ user }: SidebarProps) {
                   <i className="fas fa-users text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
                   الطلاب والنتائج
                 </Link>
+
+                <Link
+                  href="/teacher/appeals"
+                  onClick={close}
+                  className={`group flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors mt-1 ${
+                    pathname.includes("/teacher/appeals")
+                      ? "bg-primary text-white font-medium shadow-md shadow-indigo-900/50"
+                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  }`}
+                >
+                  <i className="fas fa-balance-scale text-lg w-6 text-center ml-2 text-gray-400 group-hover:text-primary transition-colors"></i>
+                  تظلمات الطلاب
+                </Link>
                 
                 <Link
                   href="/teacher/analytics"

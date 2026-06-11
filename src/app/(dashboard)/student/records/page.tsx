@@ -5,13 +5,14 @@ import StudentRecordsClient from "./StudentRecordsClient";
 export default async function StudentRecordsPage() {
     const user = await requireAuth();
 
-    // Fetch all graded attempts for the student
+    // Fetch all graded attempts for the student, including their appeals
     const attempts = await prisma.examAttempt.findMany({
         where: { studentId: user.id, status: 'GRADED' },
         include: {
             exam: {
                 include: { course: true }
-            }
+            },
+            appeals: true
         },
         orderBy: { submittedAt: 'desc' }
     });
@@ -33,21 +34,29 @@ export default async function StudentRecordsPage() {
             status = scorePercentage >= 85 ? 'اجتياز بتفوق' : 'اجتياز';
         }
 
+        const appeal = attempt.appeals[0] || null;
+
         return {
             id: attempt.id,
             courseName: attempt.exam.course.name,
             courseCode: attempt.exam.course.code,
             examTitle: attempt.exam.title,
-            submittedAt: attempt.submittedAt,
+            submittedAt: attempt.submittedAt ? attempt.submittedAt.toISOString() : null,
             score: score,
             maxScore: maxScore,
-            status: status
+            status: status,
+            appeal: appeal ? {
+                id: appeal.id,
+                reason: appeal.reason,
+                status: appeal.status,
+                pointsAdded: appeal.pointsAdded,
+                teacherNotes: appeal.teacherNotes || ""
+            } : null
         };
     });
 
     let gpa = 0.0;
     if (totalPoints > 0) {
-        // Simple GPA calculation (percentage scaled to 4.0)
         gpa = (earnedPoints / totalPoints) * 4.0;
     }
 

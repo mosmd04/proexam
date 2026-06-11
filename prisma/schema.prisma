@@ -12,11 +12,13 @@
 // ============================================================================
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ============================================================================
@@ -452,6 +454,7 @@ model ExamAttempt {
   gradedBy       User?           @relation("GradedBy", fields: [gradedById], references: [id], onDelete: SetNull)
   answers        StudentAnswer[]
   proctoringLogs ProctoringLog[]
+  appeals        ExamAppeal[]
 
   /// A student can only have one IN_PROGRESS attempt per exam (enforced at app level too),
   /// but the unique constraint ensures at most one record per exam+student+attemptNumber.
@@ -548,4 +551,23 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model ExamAppeal {
+  id           String      @id @default(uuid()) @db.Uuid
+  attemptId    String      @db.Uuid
+  studentId    String      @db.Uuid
+  reason       String      @db.Text
+  status       String      @default("PENDING") // PENDING, APPROVED, REJECTED
+  teacherNotes String?     @db.Text
+  pointsAdded  Float       @default(0.0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  attempt      ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+  @@index([studentId])
+  @@index([status])
+  @@map("exam_appeals")
 }

@@ -107,3 +107,88 @@ export async function finalizeAttemptGrade(attemptId: string) {
 
   return true;
 }
+
+/**
+ * Saves a single student answer incrementally during the exam
+ */
+export async function saveSingleAnswerAction(
+  attemptId: string,
+  examQuestionId: string,
+  answer: string,
+  flaggedForReview: boolean
+) {
+  const user = await auth();
+  if (!user) throw new Error("Unauthorized");
+
+  const attempt = await prisma.examAttempt.findFirst({
+    where: { id: attemptId, studentId: user.id }
+  });
+
+  if (!attempt) throw new Error("Attempt not found");
+  if (attempt.status !== "IN_PROGRESS") throw new Error("Exam already submitted");
+
+  await prisma.studentAnswer.upsert({
+    where: {
+      attemptId_examQuestionId: {
+        attemptId,
+        examQuestionId
+      }
+    },
+    update: {
+      answerPayload: answer,
+      flaggedForReview
+    },
+    create: {
+      attemptId,
+      examQuestionId,
+      answerPayload: answer,
+      flaggedForReview
+    }
+  });
+
+  return { success: true };
+}
+
+/**
+ * Synchronizes multiple unsynced answers queued offline
+ */
+export async function syncAnswersAction(
+  attemptId: string,
+  answers: Array<{ examQuestionId: string; answer: string; flaggedForReview: boolean }>
+) {
+  const user = await auth();
+  if (!user) throw new Error("Unauthorized");
+
+  const attempt = await prisma.examAttempt.findFirst({
+    where: { id: attemptId, studentId: user.id }
+  });
+
+  if (!attempt) throw new Error("Attempt not found");
+  if (attempt.status !== "IN_PROGRESS") throw new Error("Exam already submitted");
+
+  // Perform bulk upserts inside a transaction
+  await prisma.$transaction(
+    answers.map((ans) =>
+      prisma.studentAnswer.upsert({
+        where: {
+          attemptId_examQuestionId: {
+            attemptId,
+            examQuestionId: ans.examQuestionId
+          }
+        },
+        update: {
+          answerPayload: ans.answer,
+          flaggedForReview: ans.flaggedForReview
+        },
+        create: {
+          attemptId,
+          examQuestionId: ans.examQuestionId,
+          answerPayload: ans.answer,
+          flaggedForReview: ans.flaggedForReview
+        }
+      })
+    )
+  );
+
+  return { success: true };
+}

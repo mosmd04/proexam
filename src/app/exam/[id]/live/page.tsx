@@ -44,7 +44,7 @@ export default async function LiveExamPage({ params }: { params: Promise<{ id: s
     return <div className="p-10 text-center text-xl text-danger font-bold">عذراً، لقد انتهى وقت هذا الامتحان في {exam.scheduledEnd.toLocaleString('ar-EG')}</div>;
   }
 
-  // Attempt Check/Create
+  // Attempt Check/Create with existing answers
   let attempt = await prisma.examAttempt.findUnique({
     where: {
       examId_studentId_attemptNumber: {
@@ -52,6 +52,9 @@ export default async function LiveExamPage({ params }: { params: Promise<{ id: s
         studentId: user.id,
         attemptNumber: 1
       }
+    },
+    include: {
+      answers: true
     }
   });
 
@@ -63,11 +66,40 @@ export default async function LiveExamPage({ params }: { params: Promise<{ id: s
         status: "IN_PROGRESS",
         startedAt: now,
         expiresAt: new Date(now.getTime() + exam.durationMinutes * 60000)
+      },
+      include: {
+        answers: true
       }
     });
   } else if (attempt.status !== "IN_PROGRESS") {
     return <div className="p-10 text-center text-xl text-success font-bold">لقد قمت بتسليم هذا الامتحان مسبقاً.</div>;
   }
 
-  return <LiveExamClient exam={exam} attemptId={attempt.id} userName={user.name} />;
+  // Map answers and flagged questions for the client component
+  const initialAnswers: Record<string, string> = {};
+  const initialFlagged: string[] = [];
+
+  if (attempt.answers) {
+    attempt.answers.forEach((ans) => {
+      if (ans.answerPayload !== null && ans.answerPayload !== undefined) {
+        // Since answerPayload is Json, safely serialize/cast it to string
+        initialAnswers[ans.examQuestionId] = typeof ans.answerPayload === 'string'
+          ? ans.answerPayload
+          : JSON.stringify(ans.answerPayload);
+      }
+      if (ans.flaggedForReview) {
+        initialFlagged.push(ans.examQuestionId);
+      }
+    });
+  }
+
+  return (
+    <LiveExamClient 
+      exam={exam} 
+      attemptId={attempt.id} 
+      userName={user.name} 
+      initialAnswers={initialAnswers} 
+      initialFlagged={initialFlagged} 
+    />
+  );
 }

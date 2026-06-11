@@ -167,7 +167,7 @@ export default function TeacherExamsClient({ data }: { data: any }) {
                                         </>
                                     )}
                                     {(exam.status === 'DRAFT' || exam.status === 'PUBLISHED') && (
-                                        <Link href={`/teacher/exams/create`} className="flex-1 lg:flex-none px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:text-primary hover:border-indigo-200 hover:bg-indigo-50 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                        <Link href={`/teacher/exams/create?id=${exam.id}`} className="flex-1 lg:flex-none px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:text-primary hover:border-indigo-200 hover:bg-indigo-50 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
                                             <i className="fas fa-pen"></i> {exam.status === 'DRAFT' ? 'إكمال الامتحان' : 'تعديل'}
                                         </Link>
                                     )}

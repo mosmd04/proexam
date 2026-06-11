@@ -30,28 +30,43 @@ interface BankQuestion {
 
 export default function CreateExamClient({ 
   courses, 
-  questionBank = [] 
+  questionBank = [],
+  exam
 }: { 
   courses: Course[]; 
   questionBank?: BankQuestion[]; 
+  exam?: any;
 }) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"IDLE" | "SAVING_DRAFT" | "PUBLISHING">("IDLE");
 
+  // Helper to format ISO date string to datetime-local format YYYY-MM-DDTHH:MM
+  const formatDateTimeLocal = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  };
+
   // Exam Settings State
-  const [title, setTitle] = useState("");
-  const [courseId, setCourseId] = useState("");
-  const [description, setDescription] = useState("");
-  const [scheduledStart, setScheduledStart] = useState("");
-  const [scheduledEnd, setScheduledEnd] = useState("");
-  const [durationMinutes, setDurationMinutes] = useState(60);
-  const [shuffleQuestions, setShuffleQuestions] = useState(true);
-  const [enableProctoring, setEnableProctoring] = useState(true);
+  const [title, setTitle] = useState(exam ? exam.title : "");
+  const [courseId, setCourseId] = useState(exam ? exam.courseId : "");
+  const [description, setDescription] = useState(exam ? exam.description : "");
+  const [scheduledStart, setScheduledStart] = useState(exam ? formatDateTimeLocal(exam.scheduledStart) : "");
+  const [scheduledEnd, setScheduledEnd] = useState(exam ? formatDateTimeLocal(exam.scheduledEnd) : "");
+  const [durationMinutes, setDurationMinutes] = useState(exam ? exam.durationMinutes : 60);
+  const [shuffleQuestions, setShuffleQuestions] = useState(exam ? exam.shuffleQuestions : true);
+  const [enableProctoring, setEnableProctoring] = useState(exam ? exam.enableProctoring : true);
 
   // Questions State
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<Question[]>(exam ? exam.questions : []);
   
   // Question Bank Modal States
   const [showBankModal, setShowBankModal] = useState(false);
@@ -109,6 +124,7 @@ export default function CreateExamClient({
       setIsSubmitting(true);
       setSubmitStatus(status === "PUBLISHED" ? "PUBLISHING" : "SAVING_DRAFT");
       await saveExam({
+        id: exam?.id, // Will update existing if present, otherwise create new
         title,
         courseId,
         description,
@@ -274,7 +290,9 @@ export default function CreateExamClient({
             <i className="fas fa-file-signature text-lg"></i>
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900">إنشاء امتحان جديد</h1>
+            <h1 className="text-xl font-extrabold text-slate-900">
+              {exam ? `تعديل واستكمال الامتحان: ${exam.title}` : "إنشاء امتحان جديد"}
+            </h1>
             <p className="text-xs text-slate-500 mt-0.5">صمم ونظم امتحاناتك بأدوات حديثة واحترافية</p>
           </div>
         </div>
@@ -1216,7 +1234,7 @@ export default function CreateExamClient({
               {filteredBankQuestions.length === 0 && (
                 <div className="py-12 text-center text-slate-400 flex flex-col items-center justify-center">
                   <i className="fas fa-database text-2xl mb-2.5 opacity-30 animate-pulse"></i>
-                  <p className="text-xs font-bold">لا توجد أسئلة تطابق الفلاتر في بنك أسئلة هذا المقرر.</p>
+                  <p className="text-xs font-bold">لا توجد أسئلة تطابق الفلاتر في بنك أسئلة هذا مقرر.</p>
                   <p className="text-[10px] text-slate-400 mt-1">المقرر الدراسي الحالي يحتوي على أسئلة بنك مخصصة فقط للكود المختار.</p>
                 </div>
               )}

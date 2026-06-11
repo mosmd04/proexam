@@ -8,26 +8,51 @@ export async function saveExam(examData: any) {
   const user = await auth();
   if (!user) throw new Error("Unauthorized");
 
-  const { title, courseId, description, scheduledStart, scheduledEnd, durationMinutes, shuffleQuestions, enableProctoring, questions, status } = examData;
+  const { id, title, courseId, description, scheduledStart, scheduledEnd, durationMinutes, shuffleQuestions, enableProctoring, questions, status } = examData;
 
   const totalPoints = questions.reduce((sum: number, q: any) => sum + q.points, 0);
 
-  // Create the exam
-  const exam = await prisma.exam.create({
-    data: {
-      title,
-      courseId,
-      createdById: user.id,
-      description,
-      status: status || "PUBLISHED",
-      durationMinutes: parseInt(durationMinutes),
-      scheduledStart: scheduledStart ? new Date(scheduledStart) : null,
-      scheduledEnd: scheduledEnd ? new Date(scheduledEnd) : null,
-      totalPoints,
-      shuffleQuestions,
-      enableProctoring,
-    }
-  });
+  let exam;
+  if (id) {
+    // Update the existing exam
+    exam = await prisma.exam.update({
+      where: { id },
+      data: {
+        title,
+        courseId,
+        description,
+        status: status || "PUBLISHED",
+        durationMinutes: parseInt(durationMinutes),
+        scheduledStart: scheduledStart ? new Date(scheduledStart) : null,
+        scheduledEnd: scheduledEnd ? new Date(scheduledEnd) : null,
+        totalPoints,
+        shuffleQuestions,
+        enableProctoring,
+      }
+    });
+
+    // Delete old exam questions snapshots to recreate them
+    await prisma.examQuestion.deleteMany({
+      where: { examId: id }
+    });
+  } else {
+    // Create new exam
+    exam = await prisma.exam.create({
+      data: {
+        title,
+        courseId,
+        createdById: user.id,
+        description,
+        status: status || "PUBLISHED",
+        durationMinutes: parseInt(durationMinutes),
+        scheduledStart: scheduledStart ? new Date(scheduledStart) : null,
+        scheduledEnd: scheduledEnd ? new Date(scheduledEnd) : null,
+        totalPoints,
+        shuffleQuestions,
+        enableProctoring,
+      }
+    });
+  }
 
   // Create questions and their snapshots
   for (let i = 0; i < questions.length; i++) {

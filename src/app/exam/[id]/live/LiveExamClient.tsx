@@ -3,6 +3,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { submitExamAction, saveSingleAnswerAction, syncAnswersAction } from '@/app/actions/submitExam';
+import LatexRenderer from '@/components/ui/LatexRenderer';
+import CodingWorkspace from '@/components/exam/CodingWorkspace';
 
 function useCountdown(initialMinutes: number) {
   const [totalSeconds, setTotalSeconds] = useState(initialMinutes * 60);
@@ -99,6 +101,7 @@ export default function LiveExamClient({
   
   const [showOfflineModal, setShowOfflineModal] = useState(false);
   const [isSyncingManual, setIsSyncingManual] = useState(false);
+  const [isCodeMode, setIsCodeMode] = useState<Record<string, boolean>>({});
 
   const questions = exam.examQuestions || [];
   const totalQuestions = questions.length;
@@ -457,7 +460,7 @@ export default function LiveExamClient({
                 <span className="w-12 h-12 bg-white border-2 rounded-xl flex items-center justify-center font-black text-xl shadow-sm text-slate-800">{currentIndex + 1}</span>
                 <div>
                   <span className="bg-slate-100 text-slate-655 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
-                    {currentQuestion.questionType === 'MCQ' ? 'اختيار من متعدد' : 'صح أو خطأ'}
+                    {currentQuestion.questionType === 'MCQ' ? 'اختيار من متعدد' : currentQuestion.questionType === 'TRUE_FALSE' ? 'صح أو خطأ' : 'سؤال مقالي / برمجي'}
                   </span>
                 </div>
               </div>
@@ -466,7 +469,9 @@ export default function LiveExamClient({
               </span>
             </div>
 
-            <h3 className="text-2xl font-bold text-gray-800 mb-10 leading-normal">{currentQuestion.text}</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-10 leading-normal">
+              <LatexRenderer text={currentQuestion.text} />
+            </h3>
 
             <div className="space-y-4">
               {currentQuestion.questionType === "MCQ" && currentQuestion.choicesPayload?.options?.map((opt: any, i: number) => {
@@ -477,7 +482,9 @@ export default function LiveExamClient({
                     <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-primary bg-primary' : 'border-gray-300'}`}>
                       {isSelected && <div className="w-2 h-2 rounded-full bg-white"></div>}
                     </div>
-                    <span className="text-xl font-bold text-gray-700">{opt.text}</span>
+                    <span className="text-xl font-bold text-gray-700">
+                      <LatexRenderer text={opt.text} />
+                    </span>
                   </label>
                 );
               })}
@@ -499,6 +506,48 @@ export default function LiveExamClient({
                     <span className="text-xl font-bold text-gray-700">خطأ</span>
                   </label>
                 </>
+              )}
+
+              {currentQuestion.questionType === "ESSAY" && (
+                <div className="space-y-4">
+                  {/* Toggle code editor vs normal textarea */}
+                  <div className="flex items-center justify-between bg-slate-100/80 p-3 rounded-2xl border border-slate-200 shadow-inner">
+                    <span className="text-xs font-bold text-slate-700">تخصيص مساحة الحل المقالي:</span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsCodeMode(prev => ({ ...prev, [currentQuestion.id]: false }))}
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${!isCodeMode[currentQuestion.id] ? 'bg-primary text-white shadow-md shadow-primary/10' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+                      >
+                        محرر نصوص عادي
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsCodeMode(prev => ({ ...prev, [currentQuestion.id]: true }))}
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${isCodeMode[currentQuestion.id] ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+                      >
+                        <i className="fas fa-code text-[10px]"></i> محرر البرمجة (IDE)
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Render Editor */}
+                  {isCodeMode[currentQuestion.id] ? (
+                    <CodingWorkspace
+                      value={answers[currentQuestion.id] || ""}
+                      onChange={(val) => handleSelectAnswer(currentQuestion.id, val)}
+                      placeholder="اكتب كود الحل هنا (اضغط Tab للإزاحات المنسقة)..."
+                    />
+                  ) : (
+                    <textarea
+                      rows={8}
+                      value={answers[currentQuestion.id] || ""}
+                      onChange={(e) => handleSelectAnswer(currentQuestion.id, e.target.value)}
+                      placeholder="اكتب إجابتك المقالية هنا بالتفصيل..."
+                      className="w-full border border-slate-200 bg-white p-4 rounded-2xl focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all font-semibold text-slate-700 text-sm leading-relaxed"
+                    />
+                  )}
+                </div>
               )}
             </div>
           </div>

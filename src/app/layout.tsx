@@ -25,6 +25,15 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
           rel="stylesheet"
         />
+        {/* KaTeX Math Equation Render Assets */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"
+          defer
+        ></script>
       </head>
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-800 antialiased font-sans">
         {children}

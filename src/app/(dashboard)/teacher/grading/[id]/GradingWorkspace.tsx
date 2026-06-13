@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react';
 import { gradeEssayAnswer, finalizeAttemptGrade } from '@/app/actions/submitExam';
 import { useRouter } from 'next/navigation';
+import LatexRenderer from '@/components/ui/LatexRenderer';
 
 export default function GradingWorkspace({ exam, attempts }: { exam: any, attempts: any[] }) {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function GradingWorkspace({ exam, attempts }: { exam: any, attemp
   // Local state to manage edits before saving
   const [grades, setGrades] = useState<Record<string, { points: string, feedback: string }>>({});
   const [isPending, startTransition] = useTransition();
+  const [viewAsCode, setViewAsCode] = useState<Record<string, boolean>>({});
 
   const selectedAttempt = attempts.find(a => a.id === selectedAttemptId);
 
@@ -169,18 +171,52 @@ export default function GradingWorkspace({ exam, attempts }: { exam: any, attemp
                                 السؤال {index + 1}
                                 {isEssay ? <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-[10px]">مقال (يحتاج مراجعة)</span> : <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px]">تصحيح تلقائي</span>}
                             </h3>
-                            <p className="text-gray-800 font-bold text-lg leading-relaxed">
-                                {q.text}
-                            </p>
+                            <div className="text-gray-800 font-bold text-lg leading-relaxed">
+                                <LatexRenderer text={q.text} />
+                            </div>
                           </div>
                         </div>
                         
                         <div className="p-6 relative">
                           <div className="mb-6 border-b border-gray-100 pb-6">
-                            <h4 className="text-sm font-bold text-gray-600 mb-2">إجابة الطالب:</h4>
-                            <div className="bg-blue-50/30 border border-blue-100 p-4 rounded-xl text-gray-800 font-medium text-base leading-loose">
+                            {isEssay ? (
+                              <div className="flex justify-between items-center mb-3">
+                                <h4 className="text-sm font-bold text-gray-600">إجابة الطالب (مقالي/برمجي):</h4>
+                                <button
+                                  type="button"
+                                  onClick={() => setViewAsCode(prev => ({ ...prev, [ans.id]: !prev[ans.id] }))}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                    viewAsCode[ans.id] 
+                                      ? 'bg-slate-900 text-white shadow-md' 
+                                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border'
+                                  }`}
+                                >
+                                  <i className="fas fa-code text-[10px]"></i>
+                                  {viewAsCode[ans.id] ? "عرض كنص عادي" : "عرض ككود برمجي"}
+                                </button>
+                              </div>
+                            ) : (
+                              <h4 className="text-sm font-bold text-gray-600 mb-2">إجابة الطالب:</h4>
+                            )}
+
+                            {viewAsCode[ans.id] ? (
+                              <div className="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-lg flex font-mono text-xs leading-6 h-64 text-left" dir="ltr">
+                                {/* Line numbers */}
+                                <div className="w-10 bg-slate-950 text-slate-500 text-right pr-2.5 pl-1 py-3 select-none border-r border-slate-800 overflow-hidden shrink-0">
+                                  {(studentAnswerText || "").split("\n").map((_: string, i: number) => (
+                                    <div key={i}>{i + 1}</div>
+                                  ))}
+                                </div>
+                                {/* Code pre */}
+                                <pre className="flex-1 p-3 text-slate-100 overflow-auto whitespace-pre font-mono leading-6">
+                                  <code>{studentAnswerText || "لا توجد إجابة مسجلة."}</code>
+                                </pre>
+                              </div>
+                            ) : (
+                              <div className="bg-blue-50/30 border border-blue-100 p-4 rounded-xl text-gray-800 font-medium text-base leading-loose whitespace-pre-wrap">
                                 {studentAnswerText || "لا توجد إجابة مسجلة."}
-                            </div>
+                              </div>
+                            )}
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">

@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { importQuestionsAction, generateQuestionsAIAction } from "@/app/actions/questionActions";
+import LatexRenderer from "@/components/ui/LatexRenderer";
 
 export default function TeacherQuestionBankClient({ data }: { data: any }) {
     const router = useRouter();
@@ -373,14 +374,19 @@ export default function TeacherQuestionBankClient({ data }: { data: any }) {
                                                     <i className="far fa-clock ml-1"></i> {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'short' }).format(new Date(q.createdAt))}
                                                 </span>
                                             </div>
-                                            <p className="text-slate-800 font-extrabold text-sm leading-relaxed mb-4">{q.text}</p>
+                                            <div className="text-slate-800 font-extrabold text-sm leading-relaxed mb-4">
+                                                <LatexRenderer text={q.text} />
+                                            </div>
                                             
                                             {/* Options */}
                                             {q.type === 'MCQ' && q.choices && q.choices.length > 0 && (
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                                                     {q.choices.map((choice: any, idx: number) => (
                                                         <div key={idx} className={`px-3 py-2 rounded-xl flex justify-between items-center truncate border ${choice.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-bold' : 'bg-slate-50 border-slate-100 text-slate-600'}`}>
-                                                            <span className="truncate">({String.fromCharCode(65 + idx)}) {choice.text}</span>
+                                                            <span className="truncate flex items-center gap-1">
+                                                                ({String.fromCharCode(65 + idx)}) 
+                                                                <LatexRenderer text={choice.text} />
+                                                            </span>
                                                             {choice.isCorrect && <i className="fas fa-check-circle text-emerald-600 text-sm"></i>}
                                                         </div>
                                                     ))}
